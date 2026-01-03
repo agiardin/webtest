@@ -64,8 +64,11 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+// Only start server if this file is run directly
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
+}
 
 module.exports = app;
