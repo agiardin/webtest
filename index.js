@@ -1,3 +1,10 @@
+const express = require('express');
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Serve the hello world page
+app.get('/', (req, res) => {
+  res.send(`
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -49,3 +56,16 @@
     </div>
 </body>
 </html>
+  `);
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
+
+module.exports = app;

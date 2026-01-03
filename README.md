@@ -1,10 +1,29 @@
 # webtest
 
-A simple Hello World web application for Vercel's free tier.
+A simple Hello World web application for Vercel's free tier using Node.js and Express.
 
 ## What's Inside
 
-This is a minimal static web application that displays "Hello World!" with a beautiful gradient background.
+This is a minimal Node.js web application that displays "Hello World!" with a beautiful gradient background.
+
+- **Node.js** runtime
+- **Express** web framework
+- Ready for Vercel deployment
+
+## Local Development
+
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Run the server:**
+   ```bash
+   npm start
+   ```
+
+3. **Visit the app:**
+   Open your browser to `http://localhost:3000`
 
 ## Deploy to Vercel
 
@@ -24,16 +43,7 @@ You can deploy this app to Vercel's free tier in seconds:
 3. **One-Click Deploy:**
    [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/agiardin/webtest)
 
-## Local Development
+## API Endpoints
 
-Simply open `index.html` in your browser, or run a local server:
-
-```bash
-# Using Python
-python -m http.server 8000
-
-# Using Node.js
-npx serve
-```
-
-Then visit `http://localhost:8000` in your browser.
+- `GET /` - Hello World page
+- `GET /health` - Health check endpoint
