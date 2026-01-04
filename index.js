@@ -191,18 +191,20 @@ app.get('/', (req, res) => {
 
         function showNextWord() {
             // Get words with frequency > 0, excluding the current word
-            const availableWords = words.filter(w => w.frequency > 0 && w !== currentWordObj);
+            let availableWords = words.filter(w => w.frequency > 0 && w !== currentWordObj);
             
-            // If no other words are available, include the current word
+            // If no other words are available, check if only the current word has frequency > 0
             if (availableWords.length === 0) {
-                const allWords = words.filter(w => w.frequency > 0);
-                if (allWords.length === 0) {
+                // Check if the current word still has frequency > 0
+                if (currentWordObj && currentWordObj.frequency > 0) {
+                    // Only the current word is available, keep showing it
+                    availableWords = [currentWordObj];
+                } else {
+                    // No words with frequency > 0
                     alert('All words have frequency 0. No words to display!');
                     backToInput();
                     return;
                 }
-                // Only the current word is available, so show it
-                availableWords.push(...allWords);
             }
 
             // Find the maximum frequency
