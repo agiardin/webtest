@@ -1333,6 +1333,7 @@ app.get('/', (req, res) => {
             if (result === 'pass') {
                 currentWordObj.correct++;
                 saveWords();
+                showNextWord(); // Select next word before showing garden
                 gardenActionAllowed = true; // Allow one garden action for correct answer
                 // Show dopamine page on correct answer
                 showPage('dopamine');
@@ -1342,6 +1343,7 @@ app.get('/', (req, res) => {
                 
                 // If punish mode is enabled, show garden and burn a plant
                 if (punishMode) {
+                    showNextWord(); // Select next word before showing garden
                     showPage('dopamine');
                     burnRandomPlant();
                 } else {
