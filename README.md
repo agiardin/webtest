@@ -1,14 +1,26 @@
 # webtest
 
-A simple Hello World web application for Vercel's free tier using Node.js and Express.
+A flashcard app for learning and memorization built with Node.js and Express.
 
 ## What's Inside
 
-This is a minimal Node.js web application that displays "Hello World!" with a beautiful gradient background.
+This is a minimal Node.js web application that helps you study and memorize words using flashcards.
 
 - **Node.js** runtime
 - **Express** web framework
+- Interactive flashcard interface
+- Random word presentation
+- Pass/Fail tracking
 - Ready for Vercel deployment
+
+## Features
+
+- **Word Input**: Enter a list of words (one per line) that you want to study
+- **Random Presentation**: Words are presented in random order to aid memorization
+- **Pass/Fail Buttons**: Mark each word as you study it
+- **Progress Tracking**: See which card you're on out of the total
+- **Cycle Through Cards**: After going through all words, the deck resets automatically
+- **Easy Navigation**: Return to the input screen anytime to change your word list
 
 ## Local Development
 
@@ -45,5 +57,5 @@ You can deploy this app to Vercel's free tier in seconds:
 
 ## API Endpoints
 
-- `GET /` - Hello World page
+- `GET /` - Flashcard app interface
 - `GET /health` - Health check endpoint
