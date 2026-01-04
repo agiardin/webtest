@@ -330,10 +330,10 @@ app.get('/', (req, res) => {
         .garden-container {
             text-align: center;
         }
-        /* Grid layout: 5 columns (GRID_COLS) × 8 rows (GRID_ROWS) */
+        /* Grid layout: 4 columns (GRID_COLS) × 6 rows (GRID_ROWS) */
         .garden-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 0.75rem;
             max-width: 600px;
             margin: 1.5rem auto;
@@ -643,8 +643,8 @@ app.get('/', (req, res) => {
         };
         
         // Garden grid dimensions
-        const GRID_COLS = 5;
-        const GRID_ROWS = 8;
+        const GRID_COLS = 4;
+        const GRID_ROWS = 6;
         const GRID_TOTAL_CELLS = GRID_COLS * GRID_ROWS;
         
         // Learning criteria constants
