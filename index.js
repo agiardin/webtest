@@ -330,11 +330,12 @@ app.get('/', (req, res) => {
         .garden-container {
             text-align: center;
         }
+        /* Grid layout: 5 columns (GRID_COLS) × 8 rows (GRID_ROWS) */
         .garden-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 0.75rem;
-            max-width: 400px;
+            max-width: 600px;
             margin: 1.5rem auto;
             padding: 0.5rem;
         }
@@ -545,6 +546,11 @@ app.get('/', (req, res) => {
         // Available plant emojis
         const PLANT_TYPES = ['🌱', '🌿', '🌻', '🌺', '🌸', '🌼', '🌷', '🌹', '🪴', '🌵', '🌴', '🌳', '🍀', '🌾'];
         
+        // Garden grid dimensions
+        const GRID_COLS = 5;
+        const GRID_ROWS = 8;
+        const GRID_TOTAL_CELLS = GRID_COLS * GRID_ROWS;
+        
         // Learning criteria constants
         const MIN_ATTEMPTS_FOR_LEARNED = 3;
         const MIN_ACCURACY_FOR_LEARNED = 0.8;
@@ -646,8 +652,8 @@ app.get('/', (req, res) => {
             if (saved) {
                 garden = JSON.parse(saved);
             } else {
-                // Initialize with 9 empty cells (3x3 grid)
-                garden = Array(9).fill(null);
+                // Initialize garden grid with empty cells
+                garden = Array(GRID_TOTAL_CELLS).fill(null);
             }
         }
         
