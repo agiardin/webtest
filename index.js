@@ -748,6 +748,7 @@ app.get('/', (req, res) => {
         
         function saveSettings() {
             localStorage.setItem('wordSelectionPoolPercent', wordSelectionPoolPercent.toString());
+            localStorage.setItem('punishMode', punishMode.toString());
         }
         
         function updatePoolPercent(value) {
@@ -758,7 +759,7 @@ app.get('/', (req, res) => {
         
         function updatePunishMode(checked) {
             punishMode = checked;
-            localStorage.setItem('punishMode', punishMode.toString());
+            saveSettings();
         }
         
         // Garden Management
