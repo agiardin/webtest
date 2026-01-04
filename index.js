@@ -651,6 +651,9 @@ app.get('/', (req, res) => {
         const MIN_ATTEMPTS_FOR_LEARNED = 3;
         const MIN_ACCURACY_FOR_LEARNED = 0.8;
         
+        // Animation constants
+        const BURN_ANIMATION_DURATION = 2000; // milliseconds, matches CSS animation
+        
         // Word selection configuration
         let wordSelectionPoolPercent = 50; // Default to 50% of words in selection pool
 
@@ -861,7 +864,10 @@ app.get('/', (req, res) => {
         
         function burnRandomPlant() {
             // Find all cells with plants
-            const plantCells = garden.map((cell, index) => cell !== null ? index : -1).filter(i => i !== -1);
+            const plantCells = garden.reduce((indices, cell, index) => {
+                if (cell !== null) indices.push(index);
+                return indices;
+            }, []);
             
             if (plantCells.length === 0) {
                 // No plants to burn, just continue
@@ -883,7 +889,7 @@ app.get('/', (req, res) => {
                 garden[randomIndex] = null;
                 saveGarden();
                 updateGardenView();
-            }, 2000); // 2 seconds matches the burn animation duration
+            }, BURN_ANIMATION_DURATION);
         }
         
         function continueTesting() {
