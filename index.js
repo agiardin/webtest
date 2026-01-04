@@ -132,6 +132,73 @@ app.get('/', (req, res) => {
             margin-top: 1rem;
         }
         
+        /* Settings Section Styles */
+        .settings-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        .settings-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        .setting-item {
+            margin-bottom: 1rem;
+        }
+        .setting-label {
+            display: block;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .setting-description {
+            display: block;
+            color: #999;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+            font-style: italic;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .slider {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+        .slider-value {
+            min-width: 50px;
+            text-align: center;
+            font-weight: 600;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+        
         /* Word List Management Styles */
         .word-list-header {
             display: flex;
@@ -272,6 +339,20 @@ app.get('/', (req, res) => {
             <!-- Testing Page -->
             <div id="testingPage" class="page active">
                 <h1>📝 Testing</h1>
+                
+                <!-- Settings Section -->
+                <div class="settings-section">
+                    <div class="settings-title">⚙️ Word Selection Settings</div>
+                    <div class="setting-item">
+                        <label class="setting-label">Word Selection Pool:</label>
+                        <span class="setting-description">Control how many words are in the selection pool. Lower values focus more on difficult words, higher values give all words more equal chances.</span>
+                        <div class="slider-container">
+                            <input type="range" min="10" max="100" value="50" class="slider" id="poolPercentSlider" oninput="updatePoolPercent(this.value)">
+                            <span class="slider-value" id="poolPercentDisplay">50%</span>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="flashcard-section">
                     <div id="noWordsMessage" class="empty-message">
                         No active words available. Please add words in the Word List page.
@@ -336,10 +417,14 @@ app.get('/', (req, res) => {
         // Learning criteria constants
         const MIN_ATTEMPTS_FOR_LEARNED = 3;
         const MIN_ACCURACY_FOR_LEARNED = 0.8;
+        
+        // Word selection configuration
+        let wordSelectionPoolPercent = 50; // Default to 50% of words in selection pool
 
         // Load saved data on page load
         window.addEventListener('DOMContentLoaded', () => {
             loadWords();
+            loadSettings();
             updateAllViews();
         });
 
@@ -394,6 +479,32 @@ app.get('/', (req, res) => {
         function saveWords() {
             localStorage.setItem('flashcardWords', JSON.stringify(words));
         }
+        
+        function loadSettings() {
+            const savedPoolPercent = localStorage.getItem('wordSelectionPoolPercent');
+            if (savedPoolPercent !== null) {
+                wordSelectionPoolPercent = parseInt(savedPoolPercent, 10);
+            }
+            // Update the slider if it exists
+            const slider = document.getElementById('poolPercentSlider');
+            if (slider) {
+                slider.value = wordSelectionPoolPercent;
+            }
+            const display = document.getElementById('poolPercentDisplay');
+            if (display) {
+                display.textContent = wordSelectionPoolPercent + '%';
+            }
+        }
+        
+        function saveSettings() {
+            localStorage.setItem('wordSelectionPoolPercent', wordSelectionPoolPercent.toString());
+        }
+        
+        function updatePoolPercent(value) {
+            wordSelectionPoolPercent = parseInt(value, 10);
+            document.getElementById('poolPercentDisplay').textContent = wordSelectionPoolPercent + '%';
+            saveSettings();
+        }
 
         function addWord() {
             const input = document.getElementById('newWordInput');
@@ -435,6 +546,9 @@ app.get('/', (req, res) => {
         // Testing Page
         function updateTestingView() {
             const activeWords = words.filter(w => w.active);
+            
+            // Initialize slider with saved value
+            loadSettings();
             
             if (activeWords.length === 0) {
                 document.getElementById('noWordsMessage').style.display = 'block';
@@ -484,9 +598,9 @@ app.get('/', (req, res) => {
                 return a.total - b.total;
             });
             
-            // Pick from top 50% with weighted random selection
-            const topHalfCount = Math.max(1, Math.ceil(wordsWithRate.length / 2));
-            const topWords = wordsWithRate.slice(0, topHalfCount);
+            // Pick from configurable percentage with weighted random selection
+            const poolCount = Math.max(1, Math.ceil(wordsWithRate.length * (wordSelectionPoolPercent / 100)));
+            const topWords = wordsWithRate.slice(0, poolCount);
             
             // Weighted random selection (higher error rate = higher chance)
             const totalWeight = topWords.reduce((sum, w) => sum + (w.errorRate + 0.1), 0);
