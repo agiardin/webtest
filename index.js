@@ -611,6 +611,7 @@ app.get('/', (req, res) => {
         let garden = [];
         let selectedCellIndex = null;
         let punishMode = false; // Whether to punish wrong answers by burning plants
+        let gardenActionAllowed = false; // Whether a garden action is allowed for the current correct answer
         
         // Plant types with growth stages
         const PLANT_TYPES = {
@@ -792,6 +793,13 @@ app.get('/', (req, res) => {
                 cellDiv.className = cell === null ? 'garden-cell empty' : 'garden-cell';
                 cellDiv.onclick = () => cell === null ? selectPlant(index) : waterPlant(index);
                 
+                // Disable interaction if no action is allowed
+                if (!gardenActionAllowed) {
+                    cellDiv.style.cursor = 'not-allowed';
+                    cellDiv.style.opacity = '0.5';
+                    cellDiv.onclick = null;
+                }
+                
                 if (cell === null) {
                     cellDiv.textContent = '+';
                 } else {
@@ -818,9 +826,23 @@ app.get('/', (req, res) => {
                 
                 grid.appendChild(cellDiv);
             });
+            
+            // Update info message based on whether action is allowed
+            const gardenInfo = document.querySelector('.garden-info');
+            if (gardenInfo) {
+                if (gardenActionAllowed) {
+                    gardenInfo.textContent = '✨ Great job! Click an empty spot to plant, or water a plant to help it grow!';
+                } else {
+                    gardenInfo.textContent = '✅ Garden action completed! Click "Continue Testing" to answer more questions.';
+                }
+            }
         }
         
         function selectPlant(cellIndex) {
+            if (!gardenActionAllowed) {
+                return; // Don't allow action if already performed
+            }
+            
             selectedCellIndex = cellIndex;
             
             // Show plant selector
@@ -865,6 +887,7 @@ app.get('/', (req, res) => {
                     type: plantType,
                     stage: 0  // Start as tiny sprout
                 };
+                gardenActionAllowed = false; // Disable further actions after planting
                 saveGarden();
                 updateGardenView();
                 closePlantSelector();
@@ -872,6 +895,10 @@ app.get('/', (req, res) => {
         }
         
         function waterPlant(cellIndex) {
+            if (!gardenActionAllowed) {
+                return; // Don't allow action if already performed
+            }
+            
             if (garden[cellIndex]) {
                 const plant = garden[cellIndex];
                 const plantType = PLANT_TYPES[plant.type];
@@ -881,6 +908,7 @@ app.get('/', (req, res) => {
                     plant.stage++;
                 }
                 
+                gardenActionAllowed = false; // Disable further actions after watering
                 saveGarden();
                 updateGardenView();
             }
@@ -917,6 +945,7 @@ app.get('/', (req, res) => {
         }
         
         function continueTesting() {
+            gardenActionAllowed = false; // Reset for next time
             showPage('testing');
         }
 
@@ -1046,6 +1075,7 @@ app.get('/', (req, res) => {
             if (result === 'pass') {
                 currentWordObj.correct++;
                 saveWords();
+                gardenActionAllowed = true; // Allow one garden action for correct answer
                 // Show dopamine page on correct answer
                 showPage('dopamine');
             } else if (result === 'fail') {
