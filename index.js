@@ -1016,21 +1016,6 @@ app.get('/', (req, res) => {
             });
         }
         
-        // Garden Management
-        function loadGarden() {
-            const saved = localStorage.getItem('gardenData');
-            if (saved) {
-                garden = JSON.parse(saved);
-            } else {
-                // Initialize garden grid with empty cells
-                garden = Array(GRID_TOTAL_CELLS).fill(null);
-            }
-        }
-        
-        function saveGarden() {
-            localStorage.setItem('gardenData', JSON.stringify(garden));
-        }
-        
         function updateGardenView() {
             const grid = document.getElementById('gardenGrid');
             grid.innerHTML = '';
@@ -1456,6 +1441,7 @@ app.get('/', (req, res) => {
         }
 
         function updateAllViews() {
+            updateWordListSelector();
             updateTestingView();
             updateWordListView();
             updateProgressView();
