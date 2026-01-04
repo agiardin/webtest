@@ -530,6 +530,24 @@ app.get('/', (req, res) => {
             <div id="wordlistPage" class="page">
                 <h1>⚙️ Settings</h1>
                 
+                <!-- Word List Selector Section -->
+                <div class="settings-section">
+                    <div class="settings-title">📚 Word Lists</div>
+                    <div class="setting-item">
+                        <label class="setting-label">Current Word List:</label>
+                        <span class="setting-description">Select a word list to study. Each list has its own words and garden progress.</span>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                            <select id="wordListSelector" onchange="switchToList(this.value)" style="flex: 1; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; cursor: pointer;">
+                            </select>
+                            <button onclick="createNewList()" style="background: #10b981; white-space: nowrap;">+ New List</button>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                            <button onclick="renameCurrentList()" style="flex: 1;">✏️ Rename</button>
+                            <button onclick="deleteCurrentList()" style="flex: 1; background: #ef4444;">🗑️ Delete</button>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Settings Section -->
                 <div class="settings-section">
                     <div class="settings-title">⚙️ Word Selection Settings</div>
@@ -636,6 +654,10 @@ app.get('/', (req, res) => {
         let autoAdvance = false; // Whether to auto-advance from garden to testing after 3 seconds
         let autoAdvanceTimeout = null; // Timeout for auto-advance
         
+        // Word list management
+        let wordLists = []; // Array of {id, name, words, garden}
+        let currentListId = null; // ID of currently active list
+        
         // Plant types with growth stages
         const PLANT_TYPES = {
             'sunflower': {
@@ -690,14 +712,16 @@ app.get('/', (req, res) => {
 
         // Load saved data on page load
         window.addEventListener('DOMContentLoaded', () => {
-            loadWords();
+            loadWordLists();
             loadSettings();
-            loadGarden();
             updateAllViews();
         });
 
         // Page Navigation
         function showPage(pageName, event) {
+            // Ensure we have the latest data from the current list
+            loadCurrentList();
+            
             // Clear any active auto-advance timer when navigating away from garden
             if (autoAdvanceTimeout) {
                 clearTimeout(autoAdvanceTimeout);
@@ -745,15 +769,174 @@ app.get('/', (req, res) => {
         }
 
         // Data Management
-        function loadWords() {
-            const saved = localStorage.getItem('flashcardWords');
+        function loadWordLists() {
+            const saved = localStorage.getItem('wordLists');
+            const savedCurrentListId = localStorage.getItem('currentListId');
+            
             if (saved) {
-                words = JSON.parse(saved);
+                // Load existing word lists structure
+                wordLists = JSON.parse(saved);
+                currentListId = savedCurrentListId;
+                
+                // Verify current list exists
+                if (!wordLists.find(list => list.id === currentListId)) {
+                    currentListId = wordLists.length > 0 ? wordLists[0].id : null;
+                }
+            } else {
+                // Migration: Check for old single list format
+                const oldWords = localStorage.getItem('flashcardWords');
+                const oldGarden = localStorage.getItem('gardenData');
+                
+                if (oldWords || oldGarden) {
+                    // Migrate old data to new format
+                    const defaultList = {
+                        id: 'list_' + Date.now(),
+                        name: 'My Word List',
+                        words: oldWords ? JSON.parse(oldWords) : [],
+                        garden: oldGarden ? JSON.parse(oldGarden) : Array(GRID_TOTAL_CELLS).fill(null)
+                    };
+                    wordLists = [defaultList];
+                    currentListId = defaultList.id;
+                    
+                    // Clear old storage
+                    localStorage.removeItem('flashcardWords');
+                    localStorage.removeItem('gardenData');
+                    
+                    saveWordLists();
+                } else {
+                    // Create default list
+                    const defaultList = {
+                        id: 'list_' + Date.now(),
+                        name: 'My Word List',
+                        words: [],
+                        garden: Array(GRID_TOTAL_CELLS).fill(null)
+                    };
+                    wordLists = [defaultList];
+                    currentListId = defaultList.id;
+                    saveWordLists();
+                }
             }
+            
+            // Load current list data into global variables
+            loadCurrentList();
+        }
+        
+        function loadCurrentList() {
+            const currentList = wordLists.find(list => list.id === currentListId);
+            if (currentList) {
+                words = currentList.words;
+                garden = currentList.garden || [];
+                
+                // Ensure garden is properly initialized
+                if (garden.length !== GRID_TOTAL_CELLS) {
+                    garden = Array(GRID_TOTAL_CELLS).fill(null);
+                    // Copy any existing plants
+                    if (currentList.garden) {
+                        for (let i = 0; i < Math.min(currentList.garden.length, GRID_TOTAL_CELLS); i++) {
+                            garden[i] = currentList.garden[i];
+                        }
+                    }
+                }
+            } else {
+                words = [];
+                garden = Array(GRID_TOTAL_CELLS).fill(null);
+            }
+        }
+        
+        function saveWordLists() {
+            // Save current state back to current list
+            const currentList = wordLists.find(list => list.id === currentListId);
+            if (currentList) {
+                currentList.words = words;
+                currentList.garden = garden;
+            }
+            
+            localStorage.setItem('wordLists', JSON.stringify(wordLists));
+            localStorage.setItem('currentListId', currentListId);
+        }
+        
+        function loadWords() {
+            // This function is now handled by loadCurrentList
+            loadCurrentList();
         }
 
         function saveWords() {
-            localStorage.setItem('flashcardWords', JSON.stringify(words));
+            saveWordLists();
+        }
+        
+        // Garden Management
+        function loadGarden() {
+            // This function is now handled by loadCurrentList
+            loadCurrentList();
+        }
+        
+        function saveGarden() {
+            saveWordLists();
+        }
+        
+        function switchToList(listId) {
+            // Save current list state before switching
+            saveWordLists();
+            
+            // Switch to new list
+            currentListId = listId;
+            loadCurrentList();
+            
+            // Update all views
+            updateAllViews();
+        }
+        
+        function createNewList() {
+            const listName = prompt('Enter a name for the new word list:');
+            if (!listName || listName.trim() === '') {
+                return;
+            }
+            
+            const newList = {
+                id: 'list_' + Date.now(),
+                name: listName.trim(),
+                words: [],
+                garden: Array(GRID_TOTAL_CELLS).fill(null)
+            };
+            
+            wordLists.push(newList);
+            switchToList(newList.id);
+        }
+        
+        function renameCurrentList() {
+            const currentList = wordLists.find(list => list.id === currentListId);
+            if (!currentList) return;
+            
+            const newName = prompt('Enter a new name for this word list:', currentList.name);
+            if (!newName || newName.trim() === '') {
+                return;
+            }
+            
+            currentList.name = newName.trim();
+            saveWordLists();
+            updateWordListView();
+        }
+        
+        function deleteCurrentList() {
+            if (wordLists.length === 1) {
+                alert('Cannot delete the last word list!');
+                return;
+            }
+            
+            const currentList = wordLists.find(list => list.id === currentListId);
+            if (!currentList) return;
+            
+            if (!confirm(\`Are you sure you want to delete "\${currentList.name}"? This cannot be undone!\`)) {
+                return;
+            }
+            
+            // Remove the list
+            wordLists = wordLists.filter(list => list.id !== currentListId);
+            
+            // Switch to first remaining list
+            if (wordLists.length > 0) {
+                switchToList(wordLists[0].id);
+            }
         }
         
         function loadSettings() {
@@ -814,6 +997,23 @@ app.get('/', (req, res) => {
         function updateAutoAdvance(checked) {
             autoAdvance = checked;
             saveSettings();
+        }
+        
+        // Word List Selector Management
+        function updateWordListSelector() {
+            const selector = document.getElementById('wordListSelector');
+            if (!selector) return;
+            
+            selector.innerHTML = '';
+            wordLists.forEach(list => {
+                const option = document.createElement('option');
+                option.value = list.id;
+                option.textContent = list.name;
+                if (list.id === currentListId) {
+                    option.selected = true;
+                }
+                selector.appendChild(option);
+            });
         }
         
         // Garden Management
@@ -1071,7 +1271,8 @@ app.get('/', (req, res) => {
             document.getElementById('noWordsMessage').style.display = 'none';
             document.getElementById('flashcardContent').style.display = 'block';
             
-            if (!currentWordObj || !currentWordObj.active) {
+            // Check if currentWordObj is valid for the current list
+            if (!currentWordObj || !currentWordObj.active || !words.includes(currentWordObj)) {
                 showNextWord();
             } else {
                 updateCardInfo();
@@ -1170,6 +1371,9 @@ app.get('/', (req, res) => {
             
             // Initialize slider with saved value
             loadSettings();
+            
+            // Update word list selector
+            updateWordListSelector();
             
             if (words.length === 0) {
                 container.innerHTML = '<li class="empty-message">No words yet. Add some words above!</li>';
