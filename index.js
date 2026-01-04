@@ -325,6 +325,113 @@ app.get('/', (req, res) => {
             margin-top: 0.5rem;
             font-size: 0.9rem;
         }
+        
+        /* Dopamine Garden Page Styles */
+        .garden-container {
+            text-align: center;
+        }
+        .garden-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            max-width: 400px;
+            margin: 1.5rem auto;
+            padding: 0.5rem;
+        }
+        .garden-cell {
+            aspect-ratio: 1;
+            background: #f0f9ff;
+            border: 3px solid #bfdbfe;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .garden-cell:hover {
+            background: #e0f2fe;
+            border-color: #60a5fa;
+            transform: scale(1.05);
+        }
+        .garden-cell.empty {
+            background: #fefce8;
+            border-color: #fde047;
+            font-size: 2rem;
+            color: #ca8a04;
+        }
+        .garden-cell .plant-size {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            font-size: 0.7rem;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 6px;
+            border-radius: 10px;
+            color: #666;
+        }
+        .plant-selector {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            max-width: 90%;
+        }
+        .plant-selector.active {
+            display: block;
+        }
+        .plant-selector-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        .plant-selector-overlay.active {
+            display: block;
+        }
+        .plant-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .plant-option {
+            font-size: 3rem;
+            padding: 1rem;
+            border: 3px solid #ddd;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+        .plant-option:hover {
+            border-color: #667eea;
+            transform: scale(1.1);
+        }
+        .garden-info {
+            margin-top: 1rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .continue-btn {
+            background: #10b981;
+            margin-top: 1rem;
+        }
+        .continue-btn:hover {
+            background: #059669;
+        }
     </style>
 </head>
 <body>
@@ -333,6 +440,7 @@ app.get('/', (req, res) => {
             <button class="nav-btn active" onclick="showPage('testing', event)">📝 Testing</button>
             <button class="nav-btn" onclick="showPage('wordlist', event)">📚 Word List</button>
             <button class="nav-btn" onclick="showPage('progress', event)">📊 Progress</button>
+            <button class="nav-btn" onclick="showPage('dopamine', event)">🌱 Garden</button>
         </nav>
         
         <div class="container">
@@ -407,13 +515,35 @@ app.get('/', (req, res) => {
                     </div>
                 </div>
             </div>
+            
+            <!-- Dopamine Garden Page -->
+            <div id="dopaminePage" class="page">
+                <h1>🌱 Your Garden</h1>
+                <div class="garden-container">
+                    <p class="garden-info">✨ Great job! Click an empty spot to plant, or water a plant to help it grow!</p>
+                    <div class="garden-grid" id="gardenGrid"></div>
+                    <button class="continue-btn" onclick="continueTesting()">Continue Testing</button>
+                </div>
+            </div>
         </div>
+    </div>
+    
+    <!-- Plant Selector Modal -->
+    <div class="plant-selector-overlay" id="plantSelectorOverlay" onclick="closePlantSelector()"></div>
+    <div class="plant-selector" id="plantSelector">
+        <h2 style="margin: 0 0 1rem 0; color: #333;">Choose a Plant</h2>
+        <div class="plant-options" id="plantOptions"></div>
     </div>
 
     <script>
         let words = [];
         let currentWordObj = null;
         let currentPage = 'testing';
+        let garden = [];
+        let selectedCellIndex = null;
+        
+        // Available plant emojis
+        const PLANT_TYPES = ['🌱', '🌿', '🌻', '🌺', '🌸', '🌼', '🌷', '🌹', '🪴', '🌵', '🌴', '🌳', '🍀', '🌾'];
         
         // Learning criteria constants
         const MIN_ATTEMPTS_FOR_LEARNED = 3;
@@ -426,6 +556,7 @@ app.get('/', (req, res) => {
         window.addEventListener('DOMContentLoaded', () => {
             loadWords();
             loadSettings();
+            loadGarden();
             updateAllViews();
         });
 
@@ -450,7 +581,7 @@ app.get('/', (req, res) => {
             } else {
                 // Fallback: find and activate the correct button based on pageName
                 const buttons = document.querySelectorAll('.nav-btn');
-                const buttonTexts = ['testing', 'wordlist', 'progress'];
+                const buttonTexts = ['testing', 'wordlist', 'progress', 'dopamine'];
                 const index = buttonTexts.indexOf(pageName);
                 if (index !== -1 && buttons[index]) {
                     buttons[index].classList.add('active');
@@ -466,6 +597,8 @@ app.get('/', (req, res) => {
                 updateWordListView();
             } else if (pageName === 'progress') {
                 updateProgressView();
+            } else if (pageName === 'dopamine') {
+                updateGardenView();
             }
         }
 
@@ -505,6 +638,97 @@ app.get('/', (req, res) => {
             wordSelectionPoolPercent = parseInt(value, 10);
             document.getElementById('poolPercentDisplay').textContent = wordSelectionPoolPercent + '%';
             saveSettings();
+        }
+        
+        // Garden Management
+        function loadGarden() {
+            const saved = localStorage.getItem('gardenData');
+            if (saved) {
+                garden = JSON.parse(saved);
+            } else {
+                // Initialize with 9 empty cells (3x3 grid)
+                garden = Array(9).fill(null);
+            }
+        }
+        
+        function saveGarden() {
+            localStorage.setItem('gardenData', JSON.stringify(garden));
+        }
+        
+        function updateGardenView() {
+            const grid = document.getElementById('gardenGrid');
+            grid.innerHTML = '';
+            
+            garden.forEach((cell, index) => {
+                const cellDiv = document.createElement('div');
+                cellDiv.className = cell === null ? 'garden-cell empty' : 'garden-cell';
+                cellDiv.onclick = () => cell === null ? selectPlant(index) : waterPlant(index);
+                
+                if (cell === null) {
+                    cellDiv.textContent = '+';
+                } else {
+                    cellDiv.textContent = cell.emoji;
+                    if (cell.size > 1) {
+                        const sizeSpan = document.createElement('span');
+                        sizeSpan.className = 'plant-size';
+                        sizeSpan.textContent = '×' + cell.size;
+                        cellDiv.appendChild(sizeSpan);
+                    }
+                }
+                
+                grid.appendChild(cellDiv);
+            });
+        }
+        
+        function selectPlant(cellIndex) {
+            selectedCellIndex = cellIndex;
+            
+            // Show plant selector
+            const overlay = document.getElementById('plantSelectorOverlay');
+            const selector = document.getElementById('plantSelector');
+            const options = document.getElementById('plantOptions');
+            
+            options.innerHTML = '';
+            PLANT_TYPES.forEach(plant => {
+                const plantDiv = document.createElement('div');
+                plantDiv.className = 'plant-option';
+                plantDiv.textContent = plant;
+                plantDiv.onclick = () => plantInCell(plant);
+                options.appendChild(plantDiv);
+            });
+            
+            overlay.classList.add('active');
+            selector.classList.add('active');
+        }
+        
+        function closePlantSelector() {
+            document.getElementById('plantSelectorOverlay').classList.remove('active');
+            document.getElementById('plantSelector').classList.remove('active');
+            selectedCellIndex = null;
+        }
+        
+        function plantInCell(plantEmoji) {
+            if (selectedCellIndex !== null) {
+                garden[selectedCellIndex] = {
+                    emoji: plantEmoji,
+                    size: 1
+                };
+                saveGarden();
+                updateGardenView();
+                closePlantSelector();
+            }
+        }
+        
+        function waterPlant(cellIndex) {
+            if (garden[cellIndex]) {
+                garden[cellIndex].size++;
+                saveGarden();
+                updateGardenView();
+            }
+        }
+        
+        function continueTesting() {
+            showPage('testing');
         }
 
         function addWord() {
@@ -632,12 +856,14 @@ app.get('/', (req, res) => {
 
             if (result === 'pass') {
                 currentWordObj.correct++;
+                saveWords();
+                // Show dopamine page on correct answer
+                showPage('dopamine');
             } else if (result === 'fail') {
                 currentWordObj.incorrect++;
+                saveWords();
+                showNextWord();
             }
-
-            saveWords();
-            showNextWord();
         }
 
         // Word List Page
@@ -731,6 +957,7 @@ app.get('/', (req, res) => {
             updateTestingView();
             updateWordListView();
             updateProgressView();
+            updateGardenView();
         }
     </script>
 </body>
