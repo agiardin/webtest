@@ -1,173 +1,6 @@
 const express = require('express');
-const session = require('express-session');
-const database = require('./database');
 const app = express();
 const port = process.env.PORT || 3000;
-
-// Simple rate limiting for authentication endpoints
-const loginAttempts = new Map();
-const MAX_ATTEMPTS = 5;
-const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-
-function rateLimitCheck(ip) {
-  const now = Date.now();
-  const attempts = loginAttempts.get(ip) || [];
-  
-  // Remove old attempts outside the window
-  const recentAttempts = attempts.filter(time => now - time < WINDOW_MS);
-  
-  if (recentAttempts.length >= MAX_ATTEMPTS) {
-    return false;
-  }
-  
-  recentAttempts.push(now);
-  loginAttempts.set(ip, recentAttempts);
-  return true;
-}
-
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'flashcard-secret-key-change-in-production',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { 
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    sameSite: 'lax' // CSRF protection while maintaining compatibility
-  }
-}));
-
-// Authentication endpoints
-app.post('/api/signup', (req, res) => {
-  try {
-    // Rate limiting check
-    const ip = req.ip || req.connection.remoteAddress;
-    if (!rateLimitCheck(ip)) {
-      return res.status(429).json({ error: 'Too many attempts. Please try again later.' });
-    }
-    
-    const { username, password } = req.body;
-    
-    if (!username || !password) {
-      return res.status(400).json({ error: 'Username and password are required' });
-    }
-    
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters' });
-    }
-    
-    const existingUser = database.users.findByUsername(username);
-    if (existingUser) {
-      return res.status(400).json({ error: 'Username already exists' });
-    }
-    
-    const user = database.users.create(username, password);
-    req.session.userId = user.id;
-    req.session.username = user.username;
-    
-    // Explicitly save session
-    req.session.save((err) => {
-      if (err) {
-        console.error('Session save error:', err);
-        return res.status(500).json({ error: 'Error creating session' });
-      }
-      res.json({ success: true, username: user.username });
-    });
-  } catch (error) {
-    console.error('Signup error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-app.post('/api/login', (req, res) => {
-  try {
-    // Rate limiting check
-    const ip = req.ip || req.connection.remoteAddress;
-    if (!rateLimitCheck(ip)) {
-      return res.status(429).json({ error: 'Too many attempts. Please try again later.' });
-    }
-    
-    const { username, password } = req.body;
-    
-    if (!username || !password) {
-      return res.status(400).json({ error: 'Username and password are required' });
-    }
-    
-    const user = database.users.findByUsername(username);
-    if (!user || !database.users.verifyPassword(user, password)) {
-      return res.status(401).json({ error: 'Invalid username or password' });
-    }
-    
-    req.session.userId = user.id;
-    req.session.username = user.username;
-    
-    // Explicitly save session
-    req.session.save((err) => {
-      if (err) {
-        console.error('Session save error:', err);
-        return res.status(500).json({ error: 'Error creating session' });
-      }
-      res.json({ success: true, username: user.username });
-    });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-app.post('/api/logout', (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).json({ error: 'Error logging out' });
-    }
-    res.json({ success: true });
-  });
-});
-
-app.get('/api/user', (req, res) => {
-  if (req.session.userId) {
-    res.json({ username: req.session.username });
-  } else {
-    res.status(401).json({ error: 'Not authenticated' });
-  }
-});
-
-// Word list endpoints
-app.post('/api/wordlist/save', (req, res) => {
-  try {
-    if (!req.session.userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    
-    const { words } = req.body;
-    if (!words || !Array.isArray(words)) {
-      return res.status(400).json({ error: 'Invalid word list' });
-    }
-    
-    database.wordLists.save(req.session.userId, words);
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Save word list error:', error);
-    res.status(500).json({ error: 'Error saving word list' });
-  }
-});
-
-app.get('/api/wordlist/load', (req, res) => {
-  try {
-    if (!req.session.userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    
-    const words = database.wordLists.load(req.session.userId);
-    res.json({ words: words || [] });
-  } catch (error) {
-    console.error('Load word list error:', error);
-    res.status(500).json({ error: 'Error loading word list' });
-  }
-});
 
 // Serve the flashcard app page
 app.get('/', (req, res) => {
@@ -297,82 +130,19 @@ app.get('/', (req, res) => {
         .back-btn:hover {
             background: #4b5563;
         }
-        .auth-section {
-            display: none;
-        }
-        .auth-section input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 1rem;
-            box-sizing: border-box;
-            margin-bottom: 1rem;
-        }
-        .auth-section input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        .auth-tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-        .auth-tab {
-            flex: 1;
-            padding: 0.75rem;
-            background: #f3f4f6;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.3s;
-        }
-        .auth-tab.active {
-            background: #667eea;
-            color: white;
-        }
-        .error-message {
-            color: #ef4444;
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-            display: none;
-        }
-        .user-info {
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.75rem;
-            background: #f3f4f6;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-        .user-info span {
-            font-weight: 600;
-            color: #667eea;
-        }
-        .logout-btn {
-            background: #6b7280;
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-        }
-        .logout-btn:hover {
-            background: #4b5563;
-        }
         .save-btn {
             background: #10b981;
-            width: 100%;
             margin-top: 1rem;
+            width: 100%;
         }
         .save-btn:hover {
             background: #059669;
         }
-        .save-status {
+        .save-message {
             color: #10b981;
-            font-size: 0.9rem;
             text-align: center;
             margin-top: 0.5rem;
+            font-size: 0.9rem;
             display: none;
         }
     </style>
@@ -381,41 +151,12 @@ app.get('/', (req, res) => {
     <div class="container">
         <h1>📚 Flashcard App</h1>
         
-        <!-- User Info Section -->
-        <div id="userInfo" class="user-info">
-            <span id="usernameDisplay"></span>
-            <button class="logout-btn" onclick="logout()">Logout</button>
-        </div>
-        
-        <!-- Authentication Section -->
-        <div id="authSection" class="auth-section">
-            <div class="auth-tabs">
-                <button class="auth-tab active" onclick="showAuthTab('login')">Login</button>
-                <button class="auth-tab" onclick="showAuthTab('signup')">Sign Up</button>
-            </div>
-            
-            <div id="authError" class="error-message"></div>
-            
-            <div id="loginForm">
-                <input type="text" id="loginUsername" placeholder="Username" />
-                <input type="password" id="loginPassword" placeholder="Password" />
-                <button class="start-btn" onclick="login()">Login</button>
-            </div>
-            
-            <div id="signupForm" style="display: none;">
-                <input type="text" id="signupUsername" placeholder="Username" />
-                <input type="password" id="signupPassword" placeholder="Password (min 6 characters)" />
-                <button class="start-btn" onclick="signup()">Sign Up</button>
-            </div>
-        </div>
-        
         <div id="inputSection" class="input-section">
             <label for="wordInput">Enter words (one per line):</label>
             <textarea id="wordInput" placeholder="apple&#10;banana&#10;cherry&#10;date"></textarea>
             <button class="start-btn" onclick="startFlashcards()">Start Flashcards</button>
-            <button class="save-btn" onclick="saveWordList()" id="saveBtn" style="display: none;">💾 Save Word List</button>
-            <div id="saveStatus" class="save-status">Saved!</div>
-        </div>
+            <button class="save-btn" onclick="saveWordList()">💾 Save Word List</button>
+            <div class="save-message" id="saveMessage">Saved!</div>
         </div>
         
         <div id="flashcardSection" class="flashcard-section">
@@ -434,217 +175,32 @@ app.get('/', (req, res) => {
     <script>
         let words = [];
         let currentWordObj = null;
-        let currentUser = null;
 
-        // Check authentication status on page load
-        async function checkAuth() {
-            try {
-                const response = await fetch('/api/user');
-                if (response.ok) {
-                    const data = await response.json();
-                    currentUser = data.username;
-                    showAuthenticatedUI();
-                    await loadWordList();
-                } else {
-                    showUnauthenticatedUI();
-                }
-            } catch (error) {
-                console.error('Auth check failed:', error);
-                showUnauthenticatedUI();
-            }
-        }
+        // Load saved word list on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadWordList();
+        });
 
-        function showAuthenticatedUI() {
-            document.getElementById('authSection').style.display = 'none';
-            document.getElementById('userInfo').style.display = 'flex';
-            document.getElementById('inputSection').style.display = 'block';
-            document.getElementById('usernameDisplay').textContent = 'Logged in as ' + currentUser;
-            document.getElementById('saveBtn').style.display = 'block';
-        }
-
-        function showUnauthenticatedUI() {
-            document.getElementById('authSection').style.display = 'block';
-            document.getElementById('userInfo').style.display = 'none';
-            document.getElementById('inputSection').style.display = 'none';
-            document.getElementById('flashcardSection').style.display = 'none';
-        }
-
-        function showAuthTab(tab) {
-            const tabs = document.querySelectorAll('.auth-tab');
-            tabs.forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            if (tab === 'login') {
-                document.getElementById('loginForm').style.display = 'block';
-                document.getElementById('signupForm').style.display = 'none';
+        function saveWordList() {
+            const input = document.getElementById('wordInput').value.trim();
+            if (input) {
+                localStorage.setItem('flashcardWordList', input);
+                const saveMessage = document.getElementById('saveMessage');
+                saveMessage.style.display = 'block';
+                setTimeout(() => {
+                    saveMessage.style.display = 'none';
+                }, 2000);
             } else {
-                document.getElementById('loginForm').style.display = 'none';
-                document.getElementById('signupForm').style.display = 'block';
-            }
-            document.getElementById('authError').style.display = 'none';
-        }
-
-        async function login() {
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            
-            if (!username || !password) {
-                showError('Please enter both username and password');
-                return;
-            }
-            
-            try {
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    currentUser = data.username;
-                    showAuthenticatedUI();
-                    await loadWordList();
-                } else {
-                    showError(data.error || 'Login failed');
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                showError('Network error. Please try again.');
+                alert('Please enter some words to save!');
             }
         }
 
-        async function signup() {
-            const username = document.getElementById('signupUsername').value.trim();
-            const password = document.getElementById('signupPassword').value;
-            
-            if (!username || !password) {
-                showError('Please enter both username and password');
-                return;
-            }
-            
-            if (password.length < 6) {
-                showError('Password must be at least 6 characters');
-                return;
-            }
-            
-            try {
-                const response = await fetch('/api/signup', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    currentUser = data.username;
-                    showAuthenticatedUI();
-                } else {
-                    showError(data.error || 'Signup failed');
-                }
-            } catch (error) {
-                console.error('Signup error:', error);
-                showError('Network error. Please try again.');
+        function loadWordList() {
+            const saved = localStorage.getItem('flashcardWordList');
+            if (saved) {
+                document.getElementById('wordInput').value = saved;
             }
         }
-
-        async function logout() {
-            try {
-                await fetch('/api/logout', { method: 'POST' });
-                currentUser = null;
-                words = [];
-                currentWordObj = null;
-                document.getElementById('wordInput').value = '';
-                showUnauthenticatedUI();
-            } catch (error) {
-                console.error('Logout error:', error);
-            }
-        }
-
-        async function saveWordList() {
-            if (!currentUser) {
-                alert('Please log in to save your word list');
-                return;
-            }
-            
-            // Get words from textarea if words array is empty
-            let wordsToSave = words;
-            if (words.length === 0) {
-                const input = document.getElementById('wordInput').value.trim();
-                if (input) {
-                    const wordList = input.split('\\n')
-                        .map(w => w.trim())
-                        .filter(w => w.length > 0);
-                    wordsToSave = wordList.map(word => ({
-                        word: word,
-                        frequency: 50
-                    }));
-                }
-            }
-            
-            try {
-                const response = await fetch('/api/wordlist/save', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ words: wordsToSave })
-                });
-                
-                if (response.ok) {
-                    const saveStatus = document.getElementById('saveStatus');
-                    saveStatus.style.display = 'block';
-                    setTimeout(() => {
-                        saveStatus.style.display = 'none';
-                    }, 2000);
-                } else {
-                    const data = await response.json().catch(err => {
-                        console.error('Failed to parse error response:', err);
-                        return {};
-                    });
-                    const errorMessage = data.error || 'Error saving word list';
-                    
-                    // If not authenticated, log out the user
-                    if (response.status === 401) {
-                        alert('Your session has expired. Please log in again.');
-                        await logout();
-                    } else {
-                        alert(errorMessage);
-                    }
-                }
-            } catch (error) {
-                console.error('Save error:', error);
-                alert('Network error. Please try again.');
-            }
-        }
-
-        async function loadWordList() {
-            if (!currentUser) return;
-            
-            try {
-                const response = await fetch('/api/wordlist/load');
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.words && data.words.length > 0) {
-                        words = data.words;
-                        // Display words in the textarea
-                        const wordTexts = words.map(w => w.word).join('\\n');
-                        document.getElementById('wordInput').value = wordTexts;
-                    }
-                }
-            } catch (error) {
-                console.error('Load error:', error);
-            }
-        }
-
-        function showError(message) {
-            const errorDiv = document.getElementById('authError');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-        }
-
-        // Initialize auth on page load
-        checkAuth();
 
         function startFlashcards() {
             const input = document.getElementById('wordInput').value.trim();
@@ -665,18 +221,10 @@ app.get('/', (req, res) => {
             }
 
             // Initialize words with frequency property (default 50)
-            // But preserve existing frequency data if words haven't changed
-            const existingWords = words.map(w => w.word);
-            const newWords = wordList.filter(w => !existingWords.includes(w));
-            const removedWords = existingWords.filter(w => !wordList.includes(w));
-            
-            if (newWords.length > 0 || removedWords.length > 0 || words.length === 0) {
-                // Words have changed, reinitialize
-                words = wordList.map(word => ({
-                    word: word,
-                    frequency: 50
-                }));
-            }
+            words = wordList.map(word => ({
+                word: word,
+                frequency: 50
+            }));
 
             document.getElementById('inputSection').style.display = 'none';
             document.getElementById('flashcardSection').style.display = 'block';
@@ -741,12 +289,9 @@ app.get('/', (req, res) => {
         }
 
         function backToInput() {
-            // Auto-save word list before going back
-            if (currentUser && words.length > 0) {
-                saveWordList();
-            }
             document.getElementById('inputSection').style.display = 'block';
             document.getElementById('flashcardSection').style.display = 'none';
+            words = [];
             currentWordObj = null;
         }
     </script>
