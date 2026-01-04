@@ -4,6 +4,27 @@ const database = require('./database');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Simple rate limiting for authentication endpoints
+const loginAttempts = new Map();
+const MAX_ATTEMPTS = 5;
+const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+
+function rateLimitCheck(ip) {
+  const now = Date.now();
+  const attempts = loginAttempts.get(ip) || [];
+  
+  // Remove old attempts outside the window
+  const recentAttempts = attempts.filter(time => now - time < WINDOW_MS);
+  
+  if (recentAttempts.length >= MAX_ATTEMPTS) {
+    return false;
+  }
+  
+  recentAttempts.push(now);
+  loginAttempts.set(ip, recentAttempts);
+  return true;
+}
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -13,13 +34,20 @@ app.use(session({
   saveUninitialized: false,
   cookie: { 
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    sameSite: 'strict' // CSRF protection
   }
 }));
 
 // Authentication endpoints
 app.post('/api/signup', (req, res) => {
   try {
+    // Rate limiting check
+    const ip = req.ip || req.connection.remoteAddress;
+    if (!rateLimitCheck(ip)) {
+      return res.status(429).json({ error: 'Too many attempts. Please try again later.' });
+    }
+    
     const { username, password } = req.body;
     
     if (!username || !password) {
@@ -48,6 +76,12 @@ app.post('/api/signup', (req, res) => {
 
 app.post('/api/login', (req, res) => {
   try {
+    // Rate limiting check
+    const ip = req.ip || req.connection.remoteAddress;
+    if (!rateLimitCheck(ip)) {
+      return res.status(429).json({ error: 'Too many attempts. Please try again later.' });
+    }
+    
     const { username, password } = req.body;
     
     if (!username || !password) {
