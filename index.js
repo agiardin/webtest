@@ -583,7 +583,16 @@ app.get('/', (req, res) => {
                         saveStatus.style.display = 'none';
                     }, 2000);
                 } else {
-                    alert('Error saving word list');
+                    const data = await response.json().catch(() => ({}));
+                    const errorMessage = data.error || 'Error saving word list';
+                    
+                    // If not authenticated, log out the user
+                    if (response.status === 401) {
+                        alert('Your session has expired. Please log in again.');
+                        await logout();
+                    } else {
+                        alert(errorMessage);
+                    }
                 }
             } catch (error) {
                 console.error('Save error:', error);
