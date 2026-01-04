@@ -3,8 +3,9 @@ const bcrypt = require('bcryptjs');
 // In-memory storage for serverless compatibility
 // NOTE: Data will be lost on serverless function restart
 // For production, use a persistent database like Vercel Postgres or external DB
-const users = new Map();
-const wordLists = new Map();
+const users = new Map(); // Map<userId, user>
+const usersByUsername = new Map(); // Map<username, user> for lookup
+const wordLists = new Map(); // Map<userId, wordList>
 let userIdCounter = 1;
 let wordListIdCounter = 1;
 
@@ -18,12 +19,17 @@ const userOperations = {
       password: hashedPassword,
       created_at: new Date().toISOString()
     };
-    users.set(username, user);
+    users.set(user.id, user);
+    usersByUsername.set(username, user);
     return { id: user.id, username: user.username };
   },
 
   findByUsername: (username) => {
-    return users.get(username);
+    return usersByUsername.get(username);
+  },
+
+  findById: (userId) => {
+    return users.get(userId);
   },
 
   verifyPassword: (user, password) => {
