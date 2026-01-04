@@ -16,51 +16,26 @@ app.get('/', (req, res) => {
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             min-height: 100vh;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        .container {
+        .app-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        .nav-bar {
             background: white;
-            padding: 2rem;
+            padding: 1rem;
             border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            max-width: 600px;
-            width: 90%;
-        }
-        h1 {
-            font-size: 2rem;
-            margin: 0 0 1.5rem 0;
-            color: #333;
-            text-align: center;
-        }
-        .input-section {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             margin-bottom: 1.5rem;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
         }
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #555;
-            font-weight: 500;
-        }
-        textarea {
-            width: 100%;
-            min-height: 120px;
-            padding: 0.75rem;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 1rem;
-            resize: vertical;
-            box-sizing: border-box;
-        }
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        button {
+        .nav-btn {
             background: #667eea;
             color: white;
             border: none;
@@ -69,20 +44,36 @@ app.get('/', (req, res) => {
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
-            transition: background 0.3s;
+            transition: all 0.3s;
         }
-        button:hover {
+        .nav-btn:hover {
             background: #5568d3;
         }
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
+        .nav-btn.active {
+            background: #764ba2;
+            box-shadow: 0 4px 12px rgba(118, 75, 162, 0.4);
         }
-        .start-btn {
-            width: 100%;
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
         }
-        .flashcard-section {
+        h1 {
+            font-size: 2rem;
+            margin: 0 0 1.5rem 0;
+            color: #333;
+            text-align: center;
+        }
+        .page {
             display: none;
+        }
+        .page.active {
+            display: block;
+        }
+        
+        /* Testing Page Styles */
+        .flashcard-section {
             text-align: center;
         }
         .flashcard {
@@ -105,6 +96,24 @@ app.get('/', (req, res) => {
             gap: 1rem;
             justify-content: center;
         }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
         .pass-btn {
             background: #10b981;
         }
@@ -122,177 +131,491 @@ app.get('/', (req, res) => {
             font-size: 0.9rem;
             margin-top: 1rem;
         }
-        .back-btn {
-            background: #6b7280;
-            margin-top: 1rem;
-            width: 100%;
+        
+        /* Word List Management Styles */
+        .word-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
         }
-        .back-btn:hover {
-            background: #4b5563;
+        .add-word-section {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
         }
-        .save-btn {
+        .add-word-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        .add-word-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .add-btn {
             background: #10b981;
-            margin-top: 1rem;
-            width: 100%;
+            padding: 0.75rem 1.5rem;
         }
-        .save-btn:hover {
+        .add-btn:hover {
             background: #059669;
         }
-        .save-message {
-            color: #10b981;
+        .word-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .word-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+        .word-item:hover {
+            transform: translateX(5px);
+        }
+        .word-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .word-stats {
+            font-size: 0.85rem;
+            color: #666;
+            margin-left: 0.5rem;
+        }
+        .remove-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+        .remove-btn:hover {
+            background: #dc2626;
+        }
+        .empty-message {
             text-align: center;
+            color: #999;
+            padding: 2rem;
+            font-style: italic;
+        }
+        
+        /* Progress Report Styles */
+        .report-card {
+            text-align: center;
+            padding: 2rem;
+        }
+        .progress-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 2rem auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
+        }
+        .progress-number {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .progress-label {
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+        .progress-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .stat-box {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+        .stat-label {
+            color: #666;
             margin-top: 0.5rem;
             font-size: 0.9rem;
-            display: none;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📚 Flashcard App</h1>
+    <div class="app-container">
+        <nav class="nav-bar">
+            <button class="nav-btn active" onclick="showPage('testing', event)">📝 Testing</button>
+            <button class="nav-btn" onclick="showPage('wordlist', event)">📚 Word List</button>
+            <button class="nav-btn" onclick="showPage('progress', event)">📊 Progress</button>
+        </nav>
         
-        <div id="inputSection" class="input-section">
-            <label for="wordInput">Enter words (one per line):</label>
-            <textarea id="wordInput" placeholder="apple&#10;banana&#10;cherry&#10;date"></textarea>
-            <button class="start-btn" onclick="startFlashcards()">Start Flashcards</button>
-            <button class="save-btn" onclick="saveWordList()">💾 Save Word List</button>
-            <div class="save-message" id="saveMessage">Saved!</div>
-        </div>
-        
-        <div id="flashcardSection" class="flashcard-section">
-            <div class="flashcard">
-                <div class="word" id="currentWord"></div>
+        <div class="container">
+            <!-- Testing Page -->
+            <div id="testingPage" class="page active">
+                <h1>📝 Testing</h1>
+                <div class="flashcard-section">
+                    <div id="noWordsMessage" class="empty-message">
+                        No active words available. Please add words in the Word List page.
+                    </div>
+                    <div id="flashcardContent" style="display: none;">
+                        <div class="flashcard">
+                            <div class="word" id="currentWord"></div>
+                        </div>
+                        <div class="button-group">
+                            <button class="pass-btn" onclick="nextWord('pass')">✓ Pass</button>
+                            <button class="fail-btn" onclick="nextWord('fail')">✗ Fail</button>
+                        </div>
+                        <p class="info" id="cardInfo"></p>
+                    </div>
+                </div>
             </div>
-            <div class="button-group">
-                <button class="pass-btn" onclick="nextWord('pass')">✓ Pass</button>
-                <button class="fail-btn" onclick="nextWord('fail')">✗ Fail</button>
+            
+            <!-- Word List Management Page -->
+            <div id="wordlistPage" class="page">
+                <h1>📚 Word List Management</h1>
+                <div class="add-word-section">
+                    <input type="text" id="newWordInput" class="add-word-input" placeholder="Enter a new word..." onkeypress="if(event.key==='Enter')addWord()">
+                    <button class="add-btn" onclick="addWord()">+ Add</button>
+                </div>
+                <ul class="word-list" id="wordListContainer">
+                    <li class="empty-message">No words yet. Add some words above!</li>
+                </ul>
             </div>
-            <p class="info" id="cardInfo"></p>
-            <button class="back-btn" onclick="backToInput()">← Back to Input</button>
+            
+            <!-- Progress Report Page -->
+            <div id="progressPage" class="page">
+                <h1>📊 Progress Report</h1>
+                <div class="report-card">
+                    <div class="progress-circle">
+                        <div class="progress-number" id="progressPercent">0%</div>
+                        <div class="progress-label">Learned</div>
+                    </div>
+                    <div class="progress-details">
+                        <div class="stat-box">
+                            <div class="stat-value" id="learnedCount">0</div>
+                            <div class="stat-label">Words Learned</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="totalCount">0</div>
+                            <div class="stat-label">Total Words</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="activeCount">0</div>
+                            <div class="stat-label">Active Words</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         let words = [];
         let currentWordObj = null;
+        let currentPage = 'testing';
+        
+        // Learning criteria constants
+        const MIN_ATTEMPTS_FOR_LEARNED = 3;
+        const MIN_ACCURACY_FOR_LEARNED = 0.8;
 
-        // Load saved word list on page load
+        // Load saved data on page load
         window.addEventListener('DOMContentLoaded', () => {
-            loadWordList();
+            loadWords();
+            updateAllViews();
         });
 
-        function saveWordList() {
-            const input = document.getElementById('wordInput').value.trim();
-            if (input) {
-                localStorage.setItem('flashcardWordList', input);
-                const saveMessage = document.getElementById('saveMessage');
-                saveMessage.style.display = 'block';
-                setTimeout(() => {
-                    saveMessage.style.display = 'none';
-                }, 2000);
+        // Page Navigation
+        function showPage(pageName, event) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageName + 'Page').classList.add('active');
+            
+            // Add active class to clicked button if event is provided
+            if (event && event.target) {
+                event.target.classList.add('active');
             } else {
-                alert('Please enter some words to save!');
+                // Fallback: find and activate the correct button based on pageName
+                const buttons = document.querySelectorAll('.nav-btn');
+                const buttonTexts = ['testing', 'wordlist', 'progress'];
+                const index = buttonTexts.indexOf(pageName);
+                if (index !== -1 && buttons[index]) {
+                    buttons[index].classList.add('active');
+                }
+            }
+            
+            currentPage = pageName;
+            
+            // Update views when switching pages
+            if (pageName === 'testing') {
+                updateTestingView();
+            } else if (pageName === 'wordlist') {
+                updateWordListView();
+            } else if (pageName === 'progress') {
+                updateProgressView();
             }
         }
 
-        function loadWordList() {
-            const saved = localStorage.getItem('flashcardWordList');
+        // Data Management
+        function loadWords() {
+            const saved = localStorage.getItem('flashcardWords');
             if (saved) {
-                document.getElementById('wordInput').value = saved;
+                words = JSON.parse(saved);
             }
         }
 
-        function startFlashcards() {
-            const input = document.getElementById('wordInput').value.trim();
+        function saveWords() {
+            localStorage.setItem('flashcardWords', JSON.stringify(words));
+        }
+
+        function addWord() {
+            const input = document.getElementById('newWordInput');
+            const word = input.value.trim();
             
-            if (!input) {
-                alert('Please enter at least one word!');
+            if (!word) {
+                alert('Please enter a word!');
                 return;
             }
-
-            // Split by newlines and filter empty lines
-            const wordList = input.split('\\n')
-                .map(w => w.trim())
-                .filter(w => w.length > 0);
-
-            if (wordList.length === 0) {
-                alert('Please enter at least one word!');
+            
+            // Check if word already exists
+            if (words.find(w => w.word.toLowerCase() === word.toLowerCase())) {
+                alert('This word already exists!');
                 return;
             }
-
-            // Initialize words with frequency property (default 50)
-            words = wordList.map(word => ({
+            
+            // Add new word with initial stats
+            words.push({
                 word: word,
-                frequency: 50
-            }));
-
-            document.getElementById('inputSection').style.display = 'none';
-            document.getElementById('flashcardSection').style.display = 'block';
+                correct: 0,
+                incorrect: 0,
+                active: true
+            });
             
-            showNextWord();
+            input.value = '';
+            saveWords();
+            updateAllViews();
+        }
+
+        function removeWord(word) {
+            const wordObj = words.find(w => w.word === word);
+            if (wordObj) {
+                wordObj.active = false;
+                saveWords();
+                updateAllViews();
+            }
+        }
+
+        // Testing Page
+        function updateTestingView() {
+            const activeWords = words.filter(w => w.active);
+            
+            if (activeWords.length === 0) {
+                document.getElementById('noWordsMessage').style.display = 'block';
+                document.getElementById('flashcardContent').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('noWordsMessage').style.display = 'none';
+            document.getElementById('flashcardContent').style.display = 'block';
+            
+            if (!currentWordObj || !currentWordObj.active) {
+                showNextWord();
+            } else {
+                updateCardInfo();
+            }
         }
 
         function showNextWord() {
-            // Get words with frequency > 0, excluding the current word
-            let availableWords = words.filter(w => w.frequency > 0 && w !== currentWordObj);
+            const activeWords = words.filter(w => w.active);
             
-            // If no other words are available, check if only the current word has frequency > 0
+            if (activeWords.length === 0) {
+                updateTestingView();
+                return;
+            }
+            
+            // Filter out current word to avoid showing the same word twice in a row
+            let availableWords = activeWords.filter(w => w !== currentWordObj);
+            
+            // If no other words available, use all active words
             if (availableWords.length === 0) {
-                // Check if the current word still has frequency > 0
-                if (currentWordObj && currentWordObj.frequency > 0) {
-                    // Only the current word is available, keep showing it
-                    availableWords = [currentWordObj];
-                } else {
-                    // No words with frequency > 0
-                    alert('All words have frequency 0. No words to display!');
-                    backToInput();
-                    return;
+                availableWords = activeWords;
+            }
+            
+            // Prioritize words with more incorrect answers (higher error rate)
+            // Calculate error rate for each word
+            const wordsWithRate = availableWords.map(w => {
+                const total = w.correct + w.incorrect;
+                const errorRate = total === 0 ? 1 : w.incorrect / total;
+                return { word: w, errorRate, total };
+            });
+            
+            // Sort by error rate (descending) and total attempts (ascending for tie-breaking)
+            wordsWithRate.sort((a, b) => {
+                if (b.errorRate !== a.errorRate) {
+                    return b.errorRate - a.errorRate;
+                }
+                return a.total - b.total;
+            });
+            
+            // Pick from top 50% with weighted random selection
+            const topHalfCount = Math.max(1, Math.ceil(wordsWithRate.length / 2));
+            const topWords = wordsWithRate.slice(0, topHalfCount);
+            
+            // Weighted random selection (higher error rate = higher chance)
+            const totalWeight = topWords.reduce((sum, w) => sum + (w.errorRate + 0.1), 0);
+            let random = Math.random() * totalWeight;
+            
+            let selected = topWords[0].word;
+            for (const item of topWords) {
+                random -= (item.errorRate + 0.1);
+                if (random <= 0) {
+                    selected = item.word;
+                    break;
                 }
             }
-
-            // Find the maximum frequency
-            const maxFrequency = Math.max(...availableWords.map(w => w.frequency));
             
-            // Get all words with the maximum frequency
-            const highestFrequencyWords = availableWords.filter(w => w.frequency === maxFrequency);
-            
-            // If there are multiple words with the same highest frequency, pick one randomly
-            const randomIndex = Math.floor(Math.random() * highestFrequencyWords.length);
-            currentWordObj = highestFrequencyWords[randomIndex];
-            
+            currentWordObj = selected;
             document.getElementById('currentWord').textContent = currentWordObj.word;
             updateCardInfo();
         }
 
         function updateCardInfo() {
-            const activeWords = words.filter(w => w.frequency > 0);
-            const avgFrequency = activeWords.length > 0 
-                ? Math.round(activeWords.reduce((sum, w) => sum + w.frequency, 0) / activeWords.length)
-                : 0;
+            const activeWords = words.filter(w => w.active);
+            const total = currentWordObj.correct + currentWordObj.incorrect;
+            const accuracy = total === 0 ? 0 : Math.round((currentWordObj.correct / total) * 100);
             
             document.getElementById('cardInfo').textContent = 
-                \`Frequency: \${currentWordObj.frequency} | Active cards: \${activeWords.length}/\${words.length} | Avg frequency: \${avgFrequency}\`;
+                \`This word: \${currentWordObj.correct} correct, \${currentWordObj.incorrect} incorrect (\${accuracy}% accuracy) | Active cards: \${activeWords.length}\`;
         }
 
         function nextWord(result) {
             if (!currentWordObj) return;
 
             if (result === 'pass') {
-                // Decrease frequency by 50% (rounded down to ensure we can reach 0)
-                currentWordObj.frequency = Math.floor(currentWordObj.frequency * 0.5);
+                currentWordObj.correct++;
             } else if (result === 'fail') {
-                // Increase frequency by 5%, capped at 100 (rounded up to ensure we can increase from 1)
-                currentWordObj.frequency = Math.min(100, Math.ceil(currentWordObj.frequency * 1.05));
+                currentWordObj.incorrect++;
             }
 
+            saveWords();
             showNextWord();
         }
 
-        function backToInput() {
-            document.getElementById('inputSection').style.display = 'block';
-            document.getElementById('flashcardSection').style.display = 'none';
-            words = [];
-            currentWordObj = null;
+        // Word List Page
+        function updateWordListView() {
+            const container = document.getElementById('wordListContainer');
+            
+            if (words.length === 0) {
+                container.innerHTML = '<li class="empty-message">No words yet. Add some words above!</li>';
+                return;
+            }
+            
+            const activeWords = words.filter(w => w.active);
+            
+            if (activeWords.length === 0) {
+                container.innerHTML = '<li class="empty-message">All words are disabled. Add new words above!</li>';
+                return;
+            }
+            
+            // Sort words by error rate (red/worst at top, green/best at bottom)
+            const sortedWords = [...activeWords].sort((a, b) => {
+                const totalA = a.correct + a.incorrect;
+                const totalB = b.correct + b.incorrect;
+                
+                // Words with no attempts go to the top (treated as needing practice)
+                if (totalA === 0 && totalB === 0) return 0;
+                if (totalA === 0) return -1;
+                if (totalB === 0) return 1;
+                
+                const errorRateA = a.incorrect / totalA;
+                const errorRateB = b.incorrect / totalB;
+                
+                return errorRateB - errorRateA;
+            });
+            
+            container.innerHTML = sortedWords.map(w => {
+                const total = w.correct + w.incorrect;
+                const errorRate = total === 0 ? 1 : w.incorrect / total;
+                
+                // Calculate color based on error rate
+                // Red (high errors) to Yellow (medium) to Green (low errors)
+                let color;
+                if (total === 0) {
+                    color = '#e5e7eb'; // Gray for no attempts
+                } else if (errorRate > 0.6) {
+                    color = '#fee2e2'; // Light red
+                } else if (errorRate > 0.4) {
+                    color = '#fed7aa'; // Light orange
+                } else if (errorRate > 0.2) {
+                    color = '#fef3c7'; // Light yellow
+                } else {
+                    color = '#d1fae5'; // Light green
+                }
+                
+                const accuracy = total === 0 ? 'Not tested' : \`\${Math.round((w.correct / total) * 100)}% accuracy\`;
+                
+                return \`
+                    <li class="word-item" style="background: \${color};">
+                        <div>
+                            <span class="word-name">\${w.word}</span>
+                            <span class="word-stats">\${w.correct} correct / \${w.incorrect} incorrect (\${accuracy})</span>
+                        </div>
+                        <button class="remove-btn" onclick="removeWord('\${w.word}')">✕</button>
+                    </li>
+                \`;
+            }).join('');
+        }
+
+        // Progress Report Page
+        function updateProgressView() {
+            const activeWords = words.filter(w => w.active);
+            const learnedWords = activeWords.filter(w => {
+                const total = w.correct + w.incorrect;
+                // Consider a word "learned" if it has been tested at least MIN_ATTEMPTS_FOR_LEARNED times and has >= MIN_ACCURACY_FOR_LEARNED accuracy
+                return total >= MIN_ATTEMPTS_FOR_LEARNED && (w.correct / total) >= MIN_ACCURACY_FOR_LEARNED;
+            });
+            
+            const totalWords = activeWords.length;
+            const learnedCount = learnedWords.length;
+            const percentage = totalWords === 0 ? 0 : Math.round((learnedCount / totalWords) * 100);
+            
+            document.getElementById('progressPercent').textContent = percentage + '%';
+            document.getElementById('learnedCount').textContent = learnedCount;
+            document.getElementById('totalCount').textContent = totalWords;
+            document.getElementById('activeCount').textContent = activeWords.length;
+        }
+
+        function updateAllViews() {
+            updateTestingView();
+            updateWordListView();
+            updateProgressView();
         }
     </script>
 </body>
