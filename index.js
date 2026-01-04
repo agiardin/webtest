@@ -404,7 +404,7 @@ app.get('/', (req, res) => {
         }
         .plant-options {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             gap: 1rem;
             margin-top: 1rem;
         }
@@ -416,10 +416,11 @@ app.get('/', (req, res) => {
             cursor: pointer;
             transition: all 0.2s;
             background: white;
+            text-align: center;
         }
         .plant-option:hover {
             border-color: #667eea;
-            transform: scale(1.1);
+            transform: scale(1.05);
         }
         .garden-info {
             margin-top: 1rem;
@@ -543,8 +544,41 @@ app.get('/', (req, res) => {
         let garden = [];
         let selectedCellIndex = null;
         
-        // Available plant emojis
-        const PLANT_TYPES = ['🌱', '🌿', '🌻', '🌺', '🌸', '🌼', '🌷', '🌹', '🪴', '🌵', '🌴', '🌳', '🍀', '🌾'];
+        // Plant types with growth stages
+        const PLANT_TYPES = {
+            'sunflower': {
+                name: 'Sunflower',
+                stages: ['🌱', '🌿', '🌻', '🌻']  // sprout, sapling, mature, flowering
+            },
+            'pine': {
+                name: 'Pine Tree',
+                stages: ['🌱', '🌲', '🌲', '🌲']  // sprout, sapling, mature, with pinecones
+            },
+            'oak': {
+                name: 'Oak Tree',
+                stages: ['🌱', '🌳', '🌳', '🌳']  // sprout, sapling, mature, full grown
+            },
+            'rose': {
+                name: 'Rose Bush',
+                stages: ['🌱', '🪴', '🌹', '🌹']  // sprout, sapling, mature, flowering
+            },
+            'crepe': {
+                name: 'Crepe Myrtle',
+                stages: ['🌱', '🌿', '🌸', '🌸']  // sprout, sapling, mature, flowering
+            },
+            'dogwood': {
+                name: 'Dogwood Tree',
+                stages: ['🌱', '🌳', '🌸', '🌸']  // sprout, sapling, mature, flowering
+            },
+            'daisy': {
+                name: 'Daisy',
+                stages: ['🌱', '🌿', '🌼', '🌼']  // sprout, sapling, mature, flowering
+            },
+            'queenanne': {
+                name: "Queen Anne's Lace",
+                stages: ['🌱', '🌿', '🤍', '🤍']  // sprout, sapling, mature, flowering
+            }
+        };
         
         // Garden grid dimensions
         const GRID_COLS = 5;
@@ -673,12 +707,18 @@ app.get('/', (req, res) => {
                 if (cell === null) {
                     cellDiv.textContent = '+';
                 } else {
-                    cellDiv.textContent = cell.emoji;
-                    if (cell.size > 1) {
-                        const sizeSpan = document.createElement('span');
-                        sizeSpan.className = 'plant-size';
-                        sizeSpan.textContent = '×' + cell.size;
-                        cellDiv.appendChild(sizeSpan);
+                    // Get the current emoji for this plant's stage
+                    const plantType = PLANT_TYPES[cell.type];
+                    const stageIndex = Math.min(cell.stage, plantType.stages.length - 1);
+                    cellDiv.textContent = plantType.stages[stageIndex];
+                    
+                    // Show stage indicator for plants beyond sprout stage
+                    if (cell.stage > 0) {
+                        const stageSpan = document.createElement('span');
+                        stageSpan.className = 'plant-size';
+                        const stageNames = ['🌱', '🌿', '🌳', '🌺'];
+                        stageSpan.textContent = stageNames[Math.min(cell.stage, 3)];
+                        cellDiv.appendChild(stageSpan);
                     }
                 }
                 
@@ -695,11 +735,12 @@ app.get('/', (req, res) => {
             const options = document.getElementById('plantOptions');
             
             options.innerHTML = '';
-            PLANT_TYPES.forEach(plant => {
+            Object.keys(PLANT_TYPES).forEach(plantKey => {
+                const plant = PLANT_TYPES[plantKey];
                 const plantDiv = document.createElement('div');
                 plantDiv.className = 'plant-option';
-                plantDiv.textContent = plant;
-                plantDiv.onclick = () => plantInCell(plant);
+                plantDiv.innerHTML = '<div style="font-size: 2.5rem;">' + plant.stages[0] + '</div><div style="font-size: 0.8rem; margin-top: 0.5rem;">' + plant.name + '</div>';
+                plantDiv.onclick = () => plantInCell(plantKey);
                 options.appendChild(plantDiv);
             });
             
@@ -713,11 +754,11 @@ app.get('/', (req, res) => {
             selectedCellIndex = null;
         }
         
-        function plantInCell(plantEmoji) {
+        function plantInCell(plantType) {
             if (selectedCellIndex !== null) {
                 garden[selectedCellIndex] = {
-                    emoji: plantEmoji,
-                    size: 1
+                    type: plantType,
+                    stage: 0  // Start as tiny sprout
                 };
                 saveGarden();
                 updateGardenView();
@@ -727,7 +768,14 @@ app.get('/', (req, res) => {
         
         function waterPlant(cellIndex) {
             if (garden[cellIndex]) {
-                garden[cellIndex].size++;
+                const plant = garden[cellIndex];
+                const plantType = PLANT_TYPES[plant.type];
+                
+                // Progress to next stage (max stage is 3: 0=sprout, 1=sapling, 2=mature, 3=flowering)
+                if (plant.stage < 3) {
+                    plant.stage++;
+                }
+                
                 saveGarden();
                 updateGardenView();
             }
