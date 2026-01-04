@@ -130,6 +130,21 @@ app.get('/', (req, res) => {
         .back-btn:hover {
             background: #4b5563;
         }
+        .save-btn {
+            background: #10b981;
+            margin-top: 1rem;
+            width: 100%;
+        }
+        .save-btn:hover {
+            background: #059669;
+        }
+        .save-message {
+            color: #10b981;
+            text-align: center;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -140,6 +155,8 @@ app.get('/', (req, res) => {
             <label for="wordInput">Enter words (one per line):</label>
             <textarea id="wordInput" placeholder="apple&#10;banana&#10;cherry&#10;date"></textarea>
             <button class="start-btn" onclick="startFlashcards()">Start Flashcards</button>
+            <button class="save-btn" onclick="saveWordList()">💾 Save Word List</button>
+            <div class="save-message" id="saveMessage">Saved!</div>
         </div>
         
         <div id="flashcardSection" class="flashcard-section">
@@ -158,6 +175,32 @@ app.get('/', (req, res) => {
     <script>
         let words = [];
         let currentWordObj = null;
+
+        // Load saved word list on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadWordList();
+        });
+
+        function saveWordList() {
+            const input = document.getElementById('wordInput').value.trim();
+            if (input) {
+                localStorage.setItem('flashcardWordList', input);
+                const saveMessage = document.getElementById('saveMessage');
+                saveMessage.style.display = 'block';
+                setTimeout(() => {
+                    saveMessage.style.display = 'none';
+                }, 2000);
+            } else {
+                alert('Please enter some words to save!');
+            }
+        }
+
+        function loadWordList() {
+            const saved = localStorage.getItem('flashcardWordList');
+            if (saved) {
+                document.getElementById('wordInput').value = saved;
+            }
+        }
 
         function startFlashcards() {
             const input = document.getElementById('wordInput').value.trim();

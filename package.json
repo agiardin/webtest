@@ -1,14 +1,14 @@
 {
   "name": "webtest",
   "version": "1.0.0",
-  "description": "A simple Hello World web application for Vercel's free tier using Node.js",
+  "description": "A simple flashcard web application for Vercel's free tier using Node.js",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "node index.js"
   },
   "keywords": [
-    "hello-world",
+    "flashcard",
     "vercel",
     "nodejs",
     "express"
