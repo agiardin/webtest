@@ -814,14 +814,12 @@ app.get('/', (req, res) => {
                     img.style.objectFit = 'contain';
                     cellDiv.appendChild(img);
                     
-                    // Show stage indicator for plants beyond sprout stage
-                    if (cell.stage > 0) {
-                        const stageSpan = document.createElement('span');
-                        stageSpan.className = 'plant-size';
-                        const stageNames = ['🌱', '🌿', '🌳', '🌺'];
-                        stageSpan.textContent = stageNames[Math.min(cell.stage, 3)];
-                        cellDiv.appendChild(stageSpan);
-                    }
+                    // Show stage indicator with simple dots (stage 0=1 dot, stage 1=2 dots, stage 2=3 dots, stage 3=4 dots)
+                    const stageSpan = document.createElement('span');
+                    stageSpan.className = 'plant-size';
+                    const dots = '•'.repeat(Math.max(1, Math.min(cell.stage + 1, 4)));
+                    stageSpan.textContent = dots;
+                    cellDiv.appendChild(stageSpan);
                 }
                 
                 grid.appendChild(cellDiv);
