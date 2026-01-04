@@ -559,6 +559,19 @@ app.get('/', (req, res) => {
                     </div>
                 </div>
                 
+                <!-- Data Management Section -->
+                <div class="settings-section">
+                    <div class="settings-title">🔄 Data Management</div>
+                    <div class="setting-item">
+                        <label class="setting-label">Reset Options:</label>
+                        <span class="setting-description">Clear your progress or garden. These actions cannot be undone!</span>
+                        <div class="button-group">
+                            <button onclick="resetWordStatistics()">Reset Word Statistics</button>
+                            <button onclick="resetGarden()">Reset Garden</button>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="add-word-section">
                     <input type="text" id="newWordInput" class="add-word-input" placeholder="Enter a new word..." onkeypress="if(event.key==='Enter')addWord()">
                     <button class="add-btn" onclick="addWord()">+ Add</button>
@@ -1243,6 +1256,28 @@ app.get('/', (req, res) => {
             updateWordListView();
             updateProgressView();
             updateGardenView();
+        }
+        
+        // Reset Functions
+        function resetGarden() {
+            if (confirm('Are you sure you want to reset your garden? This will remove all plants and cannot be undone!')) {
+                garden = Array(GRID_TOTAL_CELLS).fill(null);
+                saveGarden();
+                updateGardenView();
+                alert('Garden has been reset successfully!');
+            }
+        }
+        
+        function resetWordStatistics() {
+            if (confirm('Are you sure you want to reset all word statistics? This will clear all correct/incorrect counts and cannot be undone!')) {
+                words.forEach(word => {
+                    word.correct = 0;
+                    word.incorrect = 0;
+                });
+                saveWords();
+                updateAllViews();
+                alert('Word statistics have been reset successfully!');
+            }
         }
     </script>
 </body>
