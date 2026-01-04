@@ -34,8 +34,9 @@ app.use(session({
   saveUninitialized: false,
   cookie: { 
     secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    sameSite: 'strict' // CSRF protection
+    sameSite: 'lax' // CSRF protection while maintaining compatibility
   }
 }));
 
@@ -67,7 +68,14 @@ app.post('/api/signup', (req, res) => {
     req.session.userId = user.id;
     req.session.username = user.username;
     
-    res.json({ success: true, username: user.username });
+    // Explicitly save session
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.status(500).json({ error: 'Error creating session' });
+      }
+      res.json({ success: true, username: user.username });
+    });
   } catch (error) {
     console.error('Signup error:', error);
     res.status(500).json({ error: 'Server error' });
@@ -96,7 +104,14 @@ app.post('/api/login', (req, res) => {
     req.session.userId = user.id;
     req.session.username = user.username;
     
-    res.json({ success: true, username: user.username });
+    // Explicitly save session
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.status(500).json({ error: 'Error creating session' });
+      }
+      res.json({ success: true, username: user.username });
+    });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Server error' });
