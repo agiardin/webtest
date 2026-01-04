@@ -157,8 +157,7 @@ app.get('/', (req, res) => {
 
     <script>
         let words = [];
-        let currentIndex = 0;
-        let usedWords = [];
+        let currentWordObj = null;
 
         function startFlashcards() {
             const input = document.getElementById('wordInput').value.trim();
@@ -169,52 +168,80 @@ app.get('/', (req, res) => {
             }
 
             // Split by newlines and filter empty lines
-            words = input.split('\\n')
+            const wordList = input.split('\\n')
                 .map(w => w.trim())
                 .filter(w => w.length > 0);
 
-            if (words.length === 0) {
+            if (wordList.length === 0) {
                 alert('Please enter at least one word!');
                 return;
             }
 
-            usedWords = [];
+            // Initialize words with frequency property (default 50)
+            words = wordList.map(word => ({
+                word: word,
+                frequency: 50
+            }));
+
             document.getElementById('inputSection').style.display = 'none';
             document.getElementById('flashcardSection').style.display = 'block';
             
-            showRandomWord();
+            showNextWord();
         }
 
-        function showRandomWord() {
-            if (usedWords.length === words.length) {
-                // All words have been shown, reset
-                usedWords = [];
+        function showNextWord() {
+            // Get words with frequency > 0
+            const availableWords = words.filter(w => w.frequency > 0);
+            
+            if (availableWords.length === 0) {
+                alert('All words have frequency 0. No words to display!');
+                backToInput();
+                return;
             }
 
-            // Get words that haven't been shown yet
-            const availableWords = words.filter(w => !usedWords.includes(w));
+            // Find the maximum frequency
+            const maxFrequency = Math.max(...availableWords.map(w => w.frequency));
             
-            // Select a random word from available words
-            const randomIndex = Math.floor(Math.random() * availableWords.length);
-            const selectedWord = availableWords[randomIndex];
+            // Get all words with the maximum frequency
+            const highestFrequencyWords = availableWords.filter(w => w.frequency === maxFrequency);
             
-            usedWords.push(selectedWord);
+            // If there are multiple words with the same highest frequency, pick one randomly
+            const randomIndex = Math.floor(Math.random() * highestFrequencyWords.length);
+            currentWordObj = highestFrequencyWords[randomIndex];
             
-            document.getElementById('currentWord').textContent = selectedWord;
+            document.getElementById('currentWord').textContent = currentWordObj.word;
+            updateCardInfo();
+        }
+
+        function updateCardInfo() {
+            const activeWords = words.filter(w => w.frequency > 0);
+            const avgFrequency = activeWords.length > 0 
+                ? Math.round(activeWords.reduce((sum, w) => sum + w.frequency, 0) / activeWords.length)
+                : 0;
+            
             document.getElementById('cardInfo').textContent = 
-                \`Card \${usedWords.length} of \${words.length}\`;
+                \`Frequency: \${currentWordObj.frequency} | Active cards: \${activeWords.length}/\${words.length} | Avg frequency: \${avgFrequency}\`;
         }
 
         function nextWord(result) {
-            // In the future, we could track pass/fail results here
-            showRandomWord();
+            if (!currentWordObj) return;
+
+            if (result === 'pass') {
+                // Decrease frequency by 50% (rounded down to ensure we can reach 0)
+                currentWordObj.frequency = Math.floor(currentWordObj.frequency * 0.5);
+            } else if (result === 'fail') {
+                // Increase frequency by 5%, capped at 100 (rounded up to ensure we can increase from 1)
+                currentWordObj.frequency = Math.min(100, Math.ceil(currentWordObj.frequency * 1.05));
+            }
+
+            showNextWord();
         }
 
         function backToInput() {
             document.getElementById('inputSection').style.display = 'block';
             document.getElementById('flashcardSection').style.display = 'none';
             words = [];
-            usedWords = [];
+            currentWordObj = null;
         }
     </script>
 </body>
