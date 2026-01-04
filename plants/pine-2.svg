@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Pine Stage 2: Medium tree -->
+  <rect width="100" height="100" fill="none"/>
+  <g transform="translate(50, 88)">
+    <!-- Trunk -->
+    <rect x="-4" y="-55" width="8" height="67" fill="#5d4037"/>
+    <!-- Triangular layers -->
+    <path d="M 0,-55 L -14,-40 L 14,-40 Z" fill="#2e7d32"/>
+    <path d="M 0,-45 L -18,-28 L 18,-28 Z" fill="#388e3c"/>
+    <path d="M 0,-35 L -22,-16 L 22,-16 Z" fill="#43a047"/>
+    <path d="M 0,-25 L -26,-4 L 26,-4 Z" fill="#4caf50"/>
+  </g>
+</svg>

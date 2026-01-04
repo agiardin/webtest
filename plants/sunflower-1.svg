@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Sunflower Stage 1: Growing -->
+  <rect width="100" height="100" fill="none"/>
+  <g transform="translate(50, 80)">
+    <!-- Stem -->
+    <rect x="-3" y="-30" width="6" height="50" fill="#689f38"/>
+    <!-- Leaves -->
+    <ellipse cx="-8" cy="-15" rx="10" ry="15" fill="#7cb342" transform="rotate(-30)"/>
+    <ellipse cx="8" cy="-15" rx="10" ry="15" fill="#8bc34a" transform="rotate(30)"/>
+    <ellipse cx="-10" cy="0" rx="12" ry="18" fill="#7cb342" transform="rotate(-40)"/>
+    <ellipse cx="10" cy="0" rx="12" ry="18" fill="#8bc34a" transform="rotate(40)"/>
+  </g>
+</svg>

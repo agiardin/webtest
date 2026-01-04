@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Daisy Stage 1: Growing -->
+  <rect width="100" height="100" fill="none"/>
+  <g transform="translate(50, 80)">
+    <!-- Stem -->
+    <rect x="-2" y="-30" width="4" height="45" fill="#7cb342"/>
+    <!-- Leaves -->
+    <ellipse cx="-8" cy="-15" rx="10" ry="14" fill="#81c784" transform="rotate(-35)"/>
+    <ellipse cx="8" cy="-15" rx="10" ry="14" fill="#9ccc65" transform="rotate(35)"/>
+    <ellipse cx="-10" cy="0" rx="12" ry="16" fill="#81c784" transform="rotate(-40)"/>
+    <ellipse cx="10" cy="0" rx="12" ry="16" fill="#9ccc65" transform="rotate(40)"/>
+  </g>
+</svg>

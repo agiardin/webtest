@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Dogwood Stage 2: Flowering -->
+  <rect width="100" height="100" fill="none"/>
+  <g transform="translate(50, 88)">
+    <!-- Trunk -->
+    <rect x="-4" y="-52" width="8" height="64" fill="#6d4c41"/>
+    <!-- Canopy with leaves -->
+    <circle cx="0" cy="-52" r="22" fill="#689f38"/>
+    <circle cx="-12" cy="-50" r="16" fill="#7cb342"/>
+    <circle cx="12" cy="-50" r="16" fill="#8bc34a"/>
+    <circle cx="-8" cy="-40" r="14" fill="#8bc34a"/>
+    <circle cx="8" cy="-40" r="14" fill="#9ccc65"/>
+    <!-- White flowers -->
+    <g transform="translate(-8, -48)">
+      <path d="M 0,-4 L 2,-1 L 4,0 L 2,1 L 0,4 L -2,1 L -4,0 L -2,-1 Z" fill="#ffffff" stroke="#f8bbd0" stroke-width="0.5"/>
+      <circle cx="0" cy="0" r="1" fill="#fff59d"/>
+    </g>
+    <g transform="translate(8, -52)">
+      <path d="M 0,-4 L 2,-1 L 4,0 L 2,1 L 0,4 L -2,1 L -4,0 L -2,-1 Z" fill="#ffffff" stroke="#f8bbd0" stroke-width="0.5"/>
+      <circle cx="0" cy="0" r="1" fill="#fff59d"/>
+    </g>
+  </g>
+</svg>

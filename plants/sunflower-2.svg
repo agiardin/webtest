@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Sunflower Stage 2: Budding -->
+  <rect width="100" height="100" fill="none"/>
+  <g transform="translate(50, 85)">
+    <!-- Stem -->
+    <rect x="-3" y="-55" width="6" height="70" fill="#689f38"/>
+    <!-- Leaves -->
+    <ellipse cx="-12" cy="-35" rx="12" ry="18" fill="#7cb342" transform="rotate(-40)"/>
+    <ellipse cx="12" cy="-35" rx="12" ry="18" fill="#8bc34a" transform="rotate(40)"/>
+    <ellipse cx="-14" cy="-10" rx="14" ry="20" fill="#7cb342" transform="rotate(-45)"/>
+    <ellipse cx="14" cy="-10" rx="14" ry="20" fill="#8bc34a" transform="rotate(45)"/>
+    <!-- Flower bud -->
+    <circle cx="0" cy="-55" r="10" fill="#aed581"/>
+  </g>
+</svg>
