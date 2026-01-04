@@ -814,10 +814,10 @@ app.get('/', (req, res) => {
                     img.style.objectFit = 'contain';
                     cellDiv.appendChild(img);
                     
-                    // Show stage indicator with simple dots (1-4 dots for stages 0-3)
+                    // Show stage indicator with simple dots (stage 0=1 dot, stage 1=2 dots, stage 2=3 dots, stage 3=4 dots)
                     const stageSpan = document.createElement('span');
                     stageSpan.className = 'plant-size';
-                    const dots = '•'.repeat(cell.stage + 1);
+                    const dots = '•'.repeat(Math.max(1, Math.min(cell.stage + 1, 4)));
                     stageSpan.textContent = dots;
                     cellDiv.appendChild(stageSpan);
                 }
