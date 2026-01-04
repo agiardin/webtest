@@ -657,14 +657,27 @@ app.get('/', (req, res) => {
         
         function updateGardenView() {
             const grid = document.getElementById('gardenGrid');
-            grid.innerHTML = garden.map((cell, index) => {
+            grid.innerHTML = '';
+            
+            garden.forEach((cell, index) => {
+                const cellDiv = document.createElement('div');
+                cellDiv.className = cell === null ? 'garden-cell empty' : 'garden-cell';
+                cellDiv.onclick = () => cell === null ? selectPlant(index) : waterPlant(index);
+                
                 if (cell === null) {
-                    return '<div class="garden-cell empty" onclick="selectPlant(' + index + ')">+</div>';
+                    cellDiv.textContent = '+';
                 } else {
-                    const sizeDisplay = cell.size > 1 ? '<span class="plant-size">×' + cell.size + '</span>' : '';
-                    return '<div class="garden-cell" onclick="waterPlant(' + index + ')">' + cell.emoji + sizeDisplay + '</div>';
+                    cellDiv.textContent = cell.emoji;
+                    if (cell.size > 1) {
+                        const sizeSpan = document.createElement('span');
+                        sizeSpan.className = 'plant-size';
+                        sizeSpan.textContent = '×' + cell.size;
+                        cellDiv.appendChild(sizeSpan);
+                    }
                 }
-            }).join('');
+                
+                grid.appendChild(cellDiv);
+            });
         }
         
         function selectPlant(cellIndex) {
@@ -675,9 +688,14 @@ app.get('/', (req, res) => {
             const selector = document.getElementById('plantSelector');
             const options = document.getElementById('plantOptions');
             
-            options.innerHTML = PLANT_TYPES.map(plant => 
-                '<div class="plant-option" onclick="plantInCell(&quot;' + plant + '&quot;)">' + plant + '</div>'
-            ).join('');
+            options.innerHTML = '';
+            PLANT_TYPES.forEach(plant => {
+                const plantDiv = document.createElement('div');
+                plantDiv.className = 'plant-option';
+                plantDiv.textContent = plant;
+                plantDiv.onclick = () => plantInCell(plant);
+                options.appendChild(plantDiv);
+            });
             
             overlay.classList.add('active');
             selector.classList.add('active');
