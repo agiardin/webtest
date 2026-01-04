@@ -340,19 +340,6 @@ app.get('/', (req, res) => {
             <div id="testingPage" class="page active">
                 <h1>📝 Testing</h1>
                 
-                <!-- Settings Section -->
-                <div class="settings-section">
-                    <div class="settings-title">⚙️ Word Selection Settings</div>
-                    <div class="setting-item">
-                        <label class="setting-label">Word Selection Pool:</label>
-                        <span class="setting-description">Control how many words are in the selection pool. Lower values focus more on difficult words, higher values give all words more equal chances.</span>
-                        <div class="slider-container">
-                            <input type="range" min="10" max="100" value="50" class="slider" id="poolPercentSlider" oninput="updatePoolPercent(this.value)">
-                            <span class="slider-value" id="poolPercentDisplay">50%</span>
-                        </div>
-                    </div>
-                </div>
-                
                 <div class="flashcard-section">
                     <div id="noWordsMessage" class="empty-message">
                         No active words available. Please add words in the Word List page.
@@ -373,6 +360,20 @@ app.get('/', (req, res) => {
             <!-- Word List Management Page -->
             <div id="wordlistPage" class="page">
                 <h1>📚 Word List Management</h1>
+                
+                <!-- Settings Section -->
+                <div class="settings-section">
+                    <div class="settings-title">⚙️ Word Selection Settings</div>
+                    <div class="setting-item">
+                        <label class="setting-label">Word Selection Pool:</label>
+                        <span class="setting-description">Control how many words are in the selection pool. Lower values focus more on difficult words, higher values give all words more equal chances.</span>
+                        <div class="slider-container">
+                            <input type="range" min="10" max="100" value="50" class="slider" id="poolPercentSlider" oninput="updatePoolPercent(this.value)">
+                            <span class="slider-value" id="poolPercentDisplay">50%</span>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="add-word-section">
                     <input type="text" id="newWordInput" class="add-word-input" placeholder="Enter a new word..." onkeypress="if(event.key==='Enter')addWord()">
                     <button class="add-btn" onclick="addWord()">+ Add</button>
@@ -547,9 +548,6 @@ app.get('/', (req, res) => {
         function updateTestingView() {
             const activeWords = words.filter(w => w.active);
             
-            // Initialize slider with saved value
-            loadSettings();
-            
             if (activeWords.length === 0) {
                 document.getElementById('noWordsMessage').style.display = 'block';
                 document.getElementById('flashcardContent').style.display = 'none';
@@ -645,6 +643,9 @@ app.get('/', (req, res) => {
         // Word List Page
         function updateWordListView() {
             const container = document.getElementById('wordListContainer');
+            
+            // Initialize slider with saved value
+            loadSettings();
             
             if (words.length === 0) {
                 container.innerHTML = '<li class="empty-message">No words yet. Add some words above!</li>';
