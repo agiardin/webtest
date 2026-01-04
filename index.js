@@ -670,6 +670,7 @@ app.get('/', (req, res) => {
         
         // Animation constants
         const BURN_ANIMATION_DURATION = 2000; // milliseconds, matches CSS animation
+        const AUTO_ADVANCE_DELAY = 3000; // milliseconds, delay before auto-advancing from garden to testing
         
         // Word selection configuration
         let wordSelectionPoolPercent = 50; // Default to 50% of words in selection pool
@@ -1001,10 +1002,10 @@ app.get('/', (req, res) => {
                 clearTimeout(autoAdvanceTimeout);
             }
             
-            // Set a 3-second timer to auto-advance to testing page
+            // Set timer to auto-advance to testing page
             autoAdvanceTimeout = setTimeout(() => {
                 continueTesting();
-            }, 3000);
+            }, AUTO_ADVANCE_DELAY);
         }
 
         function addWord() {
