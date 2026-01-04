@@ -214,13 +214,13 @@ app.get('/', (req, res) => {
         }
 
         function updateCardInfo() {
-            const nonZeroWords = words.filter(w => w.frequency > 0).length;
-            const avgFrequency = nonZeroWords > 0 
-                ? Math.round(words.reduce((sum, w) => sum + w.frequency, 0) / words.length)
+            const activeWords = words.filter(w => w.frequency > 0);
+            const avgFrequency = activeWords.length > 0 
+                ? Math.round(activeWords.reduce((sum, w) => sum + w.frequency, 0) / activeWords.length)
                 : 0;
             
             document.getElementById('cardInfo').textContent = 
-                \`Frequency: \${currentWordObj.frequency} | Active cards: \${nonZeroWords}/\${words.length} | Avg frequency: \${avgFrequency}\`;
+                \`Frequency: \${currentWordObj.frequency} | Active cards: \${activeWords.length}/\${words.length} | Avg frequency: \${avgFrequency}\`;
         }
 
         function nextWord(result) {
