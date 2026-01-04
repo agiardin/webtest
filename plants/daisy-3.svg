@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Daisy Stage 3: Blooming -->
+  <rect width="100" height="100" fill="none"/>
+  <g transform="translate(50, 85)">
+    <!-- Stem -->
+    <rect x="-2" y="-50" width="4" height="65" fill="#7cb342"/>
+    <!-- Leaves -->
+    <ellipse cx="-10" cy="-35" rx="12" ry="16" fill="#81c784" transform="rotate(-40)"/>
+    <ellipse cx="10" cy="-35" rx="12" ry="16" fill="#9ccc65" transform="rotate(40)"/>
+    <ellipse cx="-12" cy="-15" rx="14" ry="18" fill="#81c784" transform="rotate(-45)"/>
+    <ellipse cx="12" cy="-15" rx="14" ry="18" fill="#9ccc65" transform="rotate(45)"/>
+    <!-- Daisy flower -->
+    <g transform="translate(0, -50)">
+      <!-- White petals -->
+      <ellipse cx="0" cy="-8" rx="4" ry="8" fill="#ffffff"/>
+      <ellipse cx="6" cy="-6" rx="4" ry="8" fill="#ffffff" transform="rotate(45)"/>
+      <ellipse cx="8" cy="0" rx="4" ry="8" fill="#ffffff" transform="rotate(90)"/>
+      <ellipse cx="6" cy="6" rx="4" ry="8" fill="#ffffff" transform="rotate(135)"/>
+      <ellipse cx="0" cy="8" rx="4" ry="8" fill="#ffffff" transform="rotate(180)"/>
+      <ellipse cx="-6" cy="6" rx="4" ry="8" fill="#ffffff" transform="rotate(225)"/>
+      <ellipse cx="-8" cy="0" rx="4" ry="8" fill="#ffffff" transform="rotate(270)"/>
+      <ellipse cx="-6" cy="-6" rx="4" ry="8" fill="#ffffff" transform="rotate(315)"/>
+      <!-- Yellow center -->
+      <circle cx="0" cy="0" r="5" fill="#ffd54f"/>
+    </g>
+  </g>
+</svg>

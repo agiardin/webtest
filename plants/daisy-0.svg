@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Daisy Stage 0: Sprout -->
+  <rect width="100" height="100" fill="none"/>
+  <g transform="translate(50, 70)">
+    <!-- Sprout leaves -->
+    <ellipse cx="-5" cy="0" rx="8" ry="12" fill="#81c784" transform="rotate(-30)"/>
+    <ellipse cx="5" cy="0" rx="8" ry="12" fill="#9ccc65" transform="rotate(30)"/>
+    <!-- Stem -->
+    <rect x="-2" y="0" width="4" height="20" fill="#7cb342"/>
+  </g>
+</svg>

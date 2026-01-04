@@ -2,6 +2,9 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Serve static files from the plants directory
+app.use('/plants', express.static('plants'));
+
 // Serve the flashcard app page
 app.get('/', (req, res) => {
   res.send(`
@@ -409,7 +412,6 @@ app.get('/', (req, res) => {
             margin-top: 1rem;
         }
         .plant-option {
-            font-size: 3rem;
             padding: 1rem;
             border: 3px solid #ddd;
             border-radius: 12px;
@@ -417,6 +419,10 @@ app.get('/', (req, res) => {
             transition: all 0.2s;
             background: white;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         .plant-option:hover {
             border-color: #667eea;
@@ -610,35 +616,35 @@ app.get('/', (req, res) => {
         const PLANT_TYPES = {
             'sunflower': {
                 name: 'Sunflower',
-                stages: ['🌱', '🌿', '🌻', '🌻']  // sprout, sapling, mature, flowering
+                stages: ['plants/sunflower-0.svg', 'plants/sunflower-1.svg', 'plants/sunflower-2.svg', 'plants/sunflower-3.svg']  // sprout, sapling, mature, flowering
             },
             'pine': {
                 name: 'Pine Tree',
-                stages: ['🌱', '🌲', '🌲', '🌲']  // sprout, sapling, mature, with pinecones
+                stages: ['plants/pine-0.svg', 'plants/pine-1.svg', 'plants/pine-2.svg', 'plants/pine-3.svg']  // sprout, sapling, mature, with pinecones
             },
             'oak': {
                 name: 'Oak Tree',
-                stages: ['🌱', '🌳', '🌳', '🌳']  // sprout, sapling, mature, full grown
+                stages: ['plants/oak-0.svg', 'plants/oak-1.svg', 'plants/oak-2.svg', 'plants/oak-3.svg']  // sprout, sapling, mature, full grown
             },
             'rose': {
                 name: 'Rose Bush',
-                stages: ['🌱', '🪴', '🌹', '🌹']  // sprout, sapling, mature, flowering
+                stages: ['plants/rose-0.svg', 'plants/rose-1.svg', 'plants/rose-2.svg', 'plants/rose-3.svg']  // sprout, sapling, mature, flowering
             },
             'crepe': {
                 name: 'Crepe Myrtle',
-                stages: ['🌱', '🌿', '🌸', '🌸']  // sprout, sapling, mature, flowering
+                stages: ['plants/crepe-0.svg', 'plants/crepe-1.svg', 'plants/crepe-2.svg', 'plants/crepe-3.svg']  // sprout, sapling, mature, flowering
             },
             'dogwood': {
                 name: 'Dogwood Tree',
-                stages: ['🌱', '🌳', '🌸', '🌸']  // sprout, sapling, mature, flowering
+                stages: ['plants/dogwood-0.svg', 'plants/dogwood-1.svg', 'plants/dogwood-2.svg', 'plants/dogwood-3.svg']  // sprout, sapling, mature, flowering
             },
             'daisy': {
                 name: 'Daisy',
-                stages: ['🌱', '🌿', '🌼', '🌼']  // sprout, sapling, mature, flowering
+                stages: ['plants/daisy-0.svg', 'plants/daisy-1.svg', 'plants/daisy-2.svg', 'plants/daisy-3.svg']  // sprout, sapling, mature, flowering
             },
             'queenanne': {
                 name: "Queen Anne's Lace",
-                stages: ['🌱', '🌿', '🤍', '🤍']  // sprout, sapling, mature, flowering
+                stages: ['plants/queenanne-0.svg', 'plants/queenanne-1.svg', 'plants/queenanne-2.svg', 'plants/queenanne-3.svg']  // sprout, sapling, mature, flowering
             }
         };
         
@@ -789,10 +795,16 @@ app.get('/', (req, res) => {
                 if (cell === null) {
                     cellDiv.textContent = '+';
                 } else {
-                    // Get the current emoji for this plant's stage
+                    // Get the current image for this plant's stage
                     const plantType = PLANT_TYPES[cell.type];
                     const stageIndex = Math.min(cell.stage, plantType.stages.length - 1);
-                    cellDiv.textContent = plantType.stages[stageIndex];
+                    const img = document.createElement('img');
+                    img.src = plantType.stages[stageIndex];
+                    img.alt = plantType.name + ' - Stage ' + (stageIndex + 1);
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'contain';
+                    cellDiv.appendChild(img);
                     
                     // Show stage indicator for plants beyond sprout stage
                     if (cell.stage > 0) {
@@ -821,7 +833,18 @@ app.get('/', (req, res) => {
                 const plant = PLANT_TYPES[plantKey];
                 const plantDiv = document.createElement('div');
                 plantDiv.className = 'plant-option';
-                plantDiv.innerHTML = '<div style="font-size: 2.5rem;">' + plant.stages[0] + '</div><div style="font-size: 0.8rem; margin-top: 0.5rem;">' + plant.name + '</div>';
+                const img = document.createElement('img');
+                img.src = plant.stages[0];
+                img.alt = plant.name;
+                img.style.width = '80px';
+                img.style.height = '80px';
+                img.style.objectFit = 'contain';
+                img.style.marginBottom = '0.5rem';
+                const nameDiv = document.createElement('div');
+                nameDiv.style.fontSize = '0.8rem';
+                nameDiv.textContent = plant.name;
+                plantDiv.appendChild(img);
+                plantDiv.appendChild(nameDiv);
                 plantDiv.onclick = () => plantInCell(plantKey);
                 options.appendChild(plantDiv);
             });

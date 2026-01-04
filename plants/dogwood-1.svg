@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Dogwood Stage 1: Young tree -->
+  <rect width="100" height="100" fill="none"/>
+  <g transform="translate(50, 85)">
+    <!-- Trunk -->
+    <rect x="-3" y="-40" width="6" height="55" fill="#6d4c41"/>
+    <!-- Small round canopy -->
+    <circle cx="0" cy="-40" r="16" fill="#7cb342"/>
+    <circle cx="-8" cy="-36" r="12" fill="#8bc34a"/>
+    <circle cx="8" cy="-36" r="12" fill="#9ccc65"/>
+  </g>
+</svg>

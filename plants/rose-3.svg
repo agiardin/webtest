@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Rose Stage 3: Blooming -->
+  <rect width="100" height="100" fill="none"/>
+  <g transform="translate(50, 85)">
+    <!-- Stem -->
+    <rect x="-3" y="-50" width="6" height="65" fill="#558b2f"/>
+    <!-- Thorns -->
+    <path d="M -3,-40 L -7,-38 L -3,-36" fill="#558b2f"/>
+    <path d="M 3,-30 L 7,-28 L 3,-26" fill="#558b2f"/>
+    <!-- Leaves -->
+    <ellipse cx="-12" cy="-35" rx="14" ry="18" fill="#66bb6a" transform="rotate(-40)"/>
+    <ellipse cx="12" cy="-35" rx="14" ry="18" fill="#81c784" transform="rotate(40)"/>
+    <ellipse cx="-14" cy="-15" rx="16" ry="20" fill="#66bb6a" transform="rotate(-45)"/>
+    <ellipse cx="14" cy="-15" rx="16" ry="20" fill="#81c784" transform="rotate(45)"/>
+    <!-- Rose flower -->
+    <g transform="translate(0, -50)">
+      <circle cx="0" cy="0" r="12" fill="#ef5350"/>
+      <circle cx="-4" cy="-2" r="6" fill="#f44336"/>
+      <circle cx="4" cy="-2" r="6" fill="#e53935"/>
+      <circle cx="0" cy="-4" r="5" fill="#c62828"/>
+    </g>
+  </g>
+</svg>

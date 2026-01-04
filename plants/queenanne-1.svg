@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Queen Anne's Lace Stage 1: Growing -->
+  <rect width="100" height="100" fill="none"/>
+  <g transform="translate(50, 80)">
+    <!-- Stem -->
+    <rect x="-2" y="-35" width="4" height="50" fill="#7cb342"/>
+    <!-- Feathery leaves -->
+    <g transform="translate(-10, -20)">
+      <path d="M 0,0 L -2,-3 L -4,-2 L -6,-5 L -8,-4" stroke="#81c784" stroke-width="2" fill="none"/>
+      <path d="M 0,0 L 2,-3 L 4,-2 L 6,-5 L 8,-4" stroke="#81c784" stroke-width="2" fill="none"/>
+    </g>
+    <g transform="translate(10, -20)">
+      <path d="M 0,0 L -2,-3 L -4,-2 L -6,-5 L -8,-4" stroke="#9ccc65" stroke-width="2" fill="none"/>
+      <path d="M 0,0 L 2,-3 L 4,-2 L 6,-5 L 8,-4" stroke="#9ccc65" stroke-width="2" fill="none"/>
+    </g>
+    <g transform="translate(-12, -5)">
+      <path d="M 0,0 L -2,-4 L -4,-3 L -6,-6 L -8,-5" stroke="#81c784" stroke-width="2" fill="none"/>
+      <path d="M 0,0 L 2,-4 L 4,-3 L 6,-6 L 8,-5" stroke="#81c784" stroke-width="2" fill="none"/>
+    </g>
+  </g>
+</svg>
