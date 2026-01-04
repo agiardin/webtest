@@ -583,7 +583,10 @@ app.get('/', (req, res) => {
                         saveStatus.style.display = 'none';
                     }, 2000);
                 } else {
-                    const data = await response.json().catch(() => ({}));
+                    const data = await response.json().catch(err => {
+                        console.error('Failed to parse error response:', err);
+                        return {};
+                    });
                     const errorMessage = data.error || 'Error saving word list';
                     
                     // If not authenticated, log out the user
