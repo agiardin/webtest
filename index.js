@@ -434,6 +434,59 @@ app.get('/', (req, res) => {
         .continue-btn:hover {
             background: #059669;
         }
+        
+        /* Flame animation styles */
+        .garden-cell.burning {
+            animation: shake 0.3s infinite, burn 2s forwards;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-5px) rotate(-5deg); }
+            75% { transform: translateX(5px) rotate(5deg); }
+        }
+        @keyframes burn {
+            0% { 
+                background: #f0f9ff;
+                border-color: #bfdbfe;
+            }
+            30% {
+                background: #fef3c7;
+                border-color: #fbbf24;
+            }
+            60% {
+                background: #fed7aa;
+                border-color: #f97316;
+            }
+            100% {
+                background: #fee2e2;
+                border-color: #ef4444;
+                opacity: 0;
+                transform: scale(0.5);
+            }
+        }
+        .garden-cell.burning::after {
+            content: '🔥';
+            position: absolute;
+            font-size: 4rem;
+            animation: flameFlicker 0.3s infinite;
+        }
+        @keyframes flameFlicker {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+        
+        /* Checkbox styles */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        .checkbox-container input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -481,6 +534,14 @@ app.get('/', (req, res) => {
                             <input type="range" min="10" max="100" value="50" class="slider" id="poolPercentSlider" oninput="updatePoolPercent(this.value)">
                             <span class="slider-value" id="poolPercentDisplay">50%</span>
                         </div>
+                    </div>
+                    <div class="setting-item">
+                        <label class="setting-label">Punishment Mode:</label>
+                        <span class="setting-description">When enabled, a wrong answer will burn one of your garden plants. Use this to add consequences for mistakes!</span>
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="punishModeCheckbox" onchange="updatePunishMode(this.checked)">
+                            <span>Punish for wrong answers</span>
+                        </label>
                     </div>
                 </div>
                 
@@ -543,6 +604,7 @@ app.get('/', (req, res) => {
         let currentPage = 'testing';
         let garden = [];
         let selectedCellIndex = null;
+        let punishMode = false; // Whether to punish wrong answers by burning plants
         
         // Plant types with growth stages
         const PLANT_TYPES = {
@@ -668,6 +730,17 @@ app.get('/', (req, res) => {
             if (display) {
                 display.textContent = wordSelectionPoolPercent + '%';
             }
+            
+            // Load punish mode setting
+            const savedPunishMode = localStorage.getItem('punishMode');
+            if (savedPunishMode !== null) {
+                punishMode = savedPunishMode === 'true';
+            }
+            // Update the checkbox if it exists
+            const checkbox = document.getElementById('punishModeCheckbox');
+            if (checkbox) {
+                checkbox.checked = punishMode;
+            }
         }
         
         function saveSettings() {
@@ -678,6 +751,11 @@ app.get('/', (req, res) => {
             wordSelectionPoolPercent = parseInt(value, 10);
             document.getElementById('poolPercentDisplay').textContent = wordSelectionPoolPercent + '%';
             saveSettings();
+        }
+        
+        function updatePunishMode(checked) {
+            punishMode = checked;
+            localStorage.setItem('punishMode', punishMode.toString());
         }
         
         // Garden Management
@@ -779,6 +857,33 @@ app.get('/', (req, res) => {
                 saveGarden();
                 updateGardenView();
             }
+        }
+        
+        function burnRandomPlant() {
+            // Find all cells with plants
+            const plantCells = garden.map((cell, index) => cell !== null ? index : -1).filter(i => i !== -1);
+            
+            if (plantCells.length === 0) {
+                // No plants to burn, just continue
+                return;
+            }
+            
+            // Select a random plant
+            const randomIndex = plantCells[Math.floor(Math.random() * plantCells.length)];
+            
+            // Get the cell element
+            const grid = document.getElementById('gardenGrid');
+            const cellDiv = grid.children[randomIndex];
+            
+            // Add burning animation
+            cellDiv.classList.add('burning');
+            
+            // After animation completes, remove the plant
+            setTimeout(() => {
+                garden[randomIndex] = null;
+                saveGarden();
+                updateGardenView();
+            }, 2000); // 2 seconds matches the burn animation duration
         }
         
         function continueTesting() {
@@ -916,7 +1021,14 @@ app.get('/', (req, res) => {
             } else if (result === 'fail') {
                 currentWordObj.incorrect++;
                 saveWords();
-                showNextWord();
+                
+                // If punish mode is enabled, show garden and burn a plant
+                if (punishMode) {
+                    showPage('dopamine');
+                    burnRandomPlant();
+                } else {
+                    showNextWord();
+                }
             }
         }
 
