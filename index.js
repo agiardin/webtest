@@ -499,7 +499,7 @@ app.get('/', (req, res) => {
     <div class="app-container">
         <nav class="nav-bar">
             <button class="nav-btn active" onclick="showPage('testing', event)">📝 Testing</button>
-            <button class="nav-btn" onclick="showPage('wordlist', event)">📚 Word List</button>
+            <button class="nav-btn" onclick="showPage('wordlist', event)">⚙️ Settings</button>
             <button class="nav-btn" onclick="showPage('progress', event)">📊 Progress</button>
             <button class="nav-btn" onclick="showPage('dopamine', event)">🌱 Garden</button>
         </nav>
@@ -526,9 +526,9 @@ app.get('/', (req, res) => {
                 </div>
             </div>
             
-            <!-- Word List Management Page -->
+            <!-- Settings Page -->
             <div id="wordlistPage" class="page">
-                <h1>📚 Word List Management</h1>
+                <h1>⚙️ Settings</h1>
                 
                 <!-- Settings Section -->
                 <div class="settings-section">
@@ -547,6 +547,14 @@ app.get('/', (req, res) => {
                         <label class="checkbox-container">
                             <input type="checkbox" id="punishModeCheckbox" onchange="updatePunishMode(this.checked)">
                             <span>Punish for wrong answers</span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label class="setting-label">Auto-Advance:</label>
+                        <span class="setting-description">Automatically return to the testing page after 3 seconds when you plant or grow a plant in the garden.</span>
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="autoAdvanceCheckbox" onchange="updateAutoAdvance(this.checked)">
+                            <span>Auto-advance from garden to testing</span>
                         </label>
                     </div>
                 </div>
@@ -612,6 +620,8 @@ app.get('/', (req, res) => {
         let selectedCellIndex = null;
         let punishMode = false; // Whether to punish wrong answers by burning plants
         let gardenActionAllowed = false; // Whether a garden action is allowed for the current correct answer
+        let autoAdvance = false; // Whether to auto-advance from garden to testing after 3 seconds
+        let autoAdvanceTimeout = null; // Timeout for auto-advance
         
         // Plant types with growth stages
         const PLANT_TYPES = {
@@ -674,6 +684,12 @@ app.get('/', (req, res) => {
 
         // Page Navigation
         function showPage(pageName, event) {
+            // Clear any active auto-advance timer when navigating away from garden
+            if (autoAdvanceTimeout) {
+                clearTimeout(autoAdvanceTimeout);
+                autoAdvanceTimeout = null;
+            }
+            
             // Hide all pages
             document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
@@ -751,11 +767,23 @@ app.get('/', (req, res) => {
             if (checkbox) {
                 checkbox.checked = punishMode;
             }
+            
+            // Load auto-advance setting
+            const savedAutoAdvance = localStorage.getItem('autoAdvance');
+            if (savedAutoAdvance !== null) {
+                autoAdvance = savedAutoAdvance === 'true';
+            }
+            // Update the checkbox if it exists
+            const autoAdvanceCheckbox = document.getElementById('autoAdvanceCheckbox');
+            if (autoAdvanceCheckbox) {
+                autoAdvanceCheckbox.checked = autoAdvance;
+            }
         }
         
         function saveSettings() {
             localStorage.setItem('wordSelectionPoolPercent', wordSelectionPoolPercent.toString());
             localStorage.setItem('punishMode', punishMode.toString());
+            localStorage.setItem('autoAdvance', autoAdvance.toString());
         }
         
         function updatePoolPercent(value) {
@@ -766,6 +794,11 @@ app.get('/', (req, res) => {
         
         function updatePunishMode(checked) {
             punishMode = checked;
+            saveSettings();
+        }
+        
+        function updateAutoAdvance(checked) {
+            autoAdvance = checked;
             saveSettings();
         }
         
@@ -889,6 +922,11 @@ app.get('/', (req, res) => {
                 saveGarden();
                 updateGardenView();
                 closePlantSelector();
+                
+                // Start auto-advance timer if enabled
+                if (autoAdvance) {
+                    startAutoAdvanceTimer();
+                }
             }
         }
         
@@ -909,6 +947,11 @@ app.get('/', (req, res) => {
                 gardenActionAllowed = false; // Disable further actions after watering
                 saveGarden();
                 updateGardenView();
+                
+                // Start auto-advance timer if enabled
+                if (autoAdvance) {
+                    startAutoAdvanceTimer();
+                }
             }
         }
         
@@ -943,8 +986,25 @@ app.get('/', (req, res) => {
         }
         
         function continueTesting() {
+            // Clear any active auto-advance timer
+            if (autoAdvanceTimeout) {
+                clearTimeout(autoAdvanceTimeout);
+                autoAdvanceTimeout = null;
+            }
             gardenActionAllowed = false; // Reset for next time
             showPage('testing');
+        }
+        
+        function startAutoAdvanceTimer() {
+            // Clear any existing timer
+            if (autoAdvanceTimeout) {
+                clearTimeout(autoAdvanceTimeout);
+            }
+            
+            // Set a 3-second timer to auto-advance to testing page
+            autoAdvanceTimeout = setTimeout(() => {
+                continueTesting();
+            }, 3000);
         }
 
         function addWord() {
