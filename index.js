@@ -263,9 +263,9 @@ app.get('/', (req, res) => {
 <body>
     <div class="app-container">
         <nav class="nav-bar">
-            <button class="nav-btn active" onclick="showPage('testing')">📝 Testing</button>
-            <button class="nav-btn" onclick="showPage('wordlist')">📚 Word List</button>
-            <button class="nav-btn" onclick="showPage('progress')">📊 Progress</button>
+            <button class="nav-btn active" onclick="showPage('testing', event)">📝 Testing</button>
+            <button class="nav-btn" onclick="showPage('wordlist', event)">📚 Word List</button>
+            <button class="nav-btn" onclick="showPage('progress', event)">📊 Progress</button>
         </nav>
         
         <div class="container">
@@ -332,6 +332,10 @@ app.get('/', (req, res) => {
         let words = [];
         let currentWordObj = null;
         let currentPage = 'testing';
+        
+        // Learning criteria constants
+        const MIN_ATTEMPTS_FOR_LEARNED = 3;
+        const MIN_ACCURACY_FOR_LEARNED = 0.8;
 
         // Load saved data on page load
         window.addEventListener('DOMContentLoaded', () => {
@@ -340,7 +344,7 @@ app.get('/', (req, res) => {
         });
 
         // Page Navigation
-        function showPage(pageName) {
+        function showPage(pageName, event) {
             // Hide all pages
             document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
@@ -354,8 +358,18 @@ app.get('/', (req, res) => {
             // Show selected page
             document.getElementById(pageName + 'Page').classList.add('active');
             
-            // Add active class to clicked button
-            event.target.classList.add('active');
+            // Add active class to clicked button if event is provided
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                // Fallback: find and activate the correct button based on pageName
+                const buttons = document.querySelectorAll('.nav-btn');
+                const buttonTexts = ['testing', 'wordlist', 'progress'];
+                const index = buttonTexts.indexOf(pageName);
+                if (index !== -1 && buttons[index]) {
+                    buttons[index].classList.add('active');
+                }
+            }
             
             currentPage = pageName;
             
@@ -584,8 +598,8 @@ app.get('/', (req, res) => {
             const activeWords = words.filter(w => w.active);
             const learnedWords = activeWords.filter(w => {
                 const total = w.correct + w.incorrect;
-                // Consider a word "learned" if it has been tested at least 3 times and has >80% accuracy
-                return total >= 3 && (w.correct / total) >= 0.8;
+                // Consider a word "learned" if it has been tested at least MIN_ATTEMPTS_FOR_LEARNED times and has >= MIN_ACCURACY_FOR_LEARNED accuracy
+                return total >= MIN_ATTEMPTS_FOR_LEARNED && (w.correct / total) >= MIN_ACCURACY_FOR_LEARNED;
             });
             
             const totalWords = activeWords.length;
