@@ -1158,9 +1158,7 @@ app.get('/', (req, res) => {
                 }
                 
                 // Progress to next stage (max stage is 3: 0=sprout, 1=sapling, 2=mature, 3=flowering)
-                if (plant.stage < 3) {
-                    plant.stage++;
-                }
+                plant.stage++;
                 
                 gardenActionAllowed = false; // Disable further actions after watering
                 saveGarden();
