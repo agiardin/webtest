@@ -558,7 +558,7 @@ app.get('/', (req, res) => {
                     </div>
                     <div class="setting-item">
                         <label class="setting-label">Auto-Advance:</label>
-                        <span class="setting-description">Automatically return to the testing page after 3 seconds when you plant or grow a plant in the garden.</span>
+                        <span class="setting-description">Automatically return to the testing page after 3 seconds when you plant or grow a plant in the garden, or when a plant burns down from a wrong answer.</span>
                         <label class="checkbox-container">
                             <input type="checkbox" id="autoAdvanceCheckbox" onchange="updateAutoAdvance(this.checked)">
                             <span>Auto-advance from garden to testing</span>
@@ -1188,6 +1188,11 @@ app.get('/', (req, res) => {
                 garden[randomIndex] = null;
                 saveGarden();
                 updateGardenView();
+                
+                // Start auto-advance timer if enabled
+                if (autoAdvance) {
+                    startAutoAdvanceTimer();
+                }
             }, BURN_ANIMATION_DURATION);
         }
         
