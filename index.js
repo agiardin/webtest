@@ -651,7 +651,7 @@ app.get('/', (req, res) => {
         let selectedCellIndex = null;
         let punishMode = false; // Whether to punish wrong answers by burning plants
         let gardenActionAllowed = false; // Whether a garden action is allowed for the current correct answer
-        let autoAdvance = false; // Whether to auto-advance from garden to testing after 3 seconds
+        let autoAdvance = true; // Whether to auto-advance from garden to testing after 3 seconds
         let autoAdvanceTimeout = null; // Timeout for auto-advance
         
         // Word list management
