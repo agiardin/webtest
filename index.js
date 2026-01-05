@@ -1035,7 +1035,6 @@ app.get('/', (req, res) => {
                 // Disable interaction if no action is allowed
                 if (!gardenActionAllowed) {
                     cellDiv.style.cursor = 'not-allowed';
-                    cellDiv.style.opacity = '0.5';
                     cellDiv.onclick = null;
                 }
                 
