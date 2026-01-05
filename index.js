@@ -388,6 +388,8 @@ app.get('/', (req, res) => {
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
             z-index: 1000;
             max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
         }
         .plant-selector.active {
             display: block;
