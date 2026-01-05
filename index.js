@@ -61,6 +61,8 @@ app.get('/', (req, res) => {
             padding: 2rem;
             border-radius: 12px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            /* Add padding bottom for mobile keyboard */
+            padding-bottom: 3rem;
         }
         h1 {
             font-size: 2rem;
@@ -220,6 +222,9 @@ app.get('/', (req, res) => {
             border: 2px solid #ddd;
             border-radius: 8px;
             font-size: 1rem;
+            /* Add scroll margin for mobile keyboards */
+            scroll-margin-top: 20px;
+            scroll-margin-bottom: 20px;
         }
         .add-word-input:focus {
             outline: none;
@@ -532,24 +537,6 @@ app.get('/', (req, res) => {
             <div id="wordlistPage" class="page active">
                 <h1>⚙️ Settings</h1>
                 
-                <!-- Word List Selector Section -->
-                <div class="settings-section">
-                    <div class="settings-title">📚 Word Lists</div>
-                    <div class="setting-item">
-                        <label class="setting-label">Current Word List:</label>
-                        <span class="setting-description">Select a word list to study. Each list has its own words and garden progress.</span>
-                        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
-                            <select id="wordListSelector" onchange="switchToList(this.value)" style="flex: 1; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; cursor: pointer;">
-                            </select>
-                            <button onclick="createNewList()" style="background: #10b981; white-space: nowrap;">+ New List</button>
-                        </div>
-                        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
-                            <button onclick="renameCurrentList()" style="flex: 1;">✏️ Rename</button>
-                            <button onclick="deleteCurrentList()" style="flex: 1; background: #ef4444;">🗑️ Delete</button>
-                        </div>
-                    </div>
-                </div>
-                
                 <!-- Settings Section -->
                 <div class="settings-section">
                     <div class="settings-title">⚙️ Word Selection Settings</div>
@@ -592,8 +579,26 @@ app.get('/', (req, res) => {
                     </div>
                 </div>
                 
+                <!-- Word List Selector Section -->
+                <div class="settings-section">
+                    <div class="settings-title">📚 Word Lists</div>
+                    <div class="setting-item">
+                        <label class="setting-label">Current Word List:</label>
+                        <span class="setting-description">Select a word list to study. Each list has its own words and garden progress.</span>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                            <select id="wordListSelector" onchange="switchToList(this.value)" style="flex: 1; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; cursor: pointer;">
+                            </select>
+                            <button onclick="createNewList()" style="background: #10b981; white-space: nowrap;">+ New List</button>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                            <button onclick="renameCurrentList()" style="flex: 1;">✏️ Rename</button>
+                            <button onclick="deleteCurrentList()" style="flex: 1; background: #ef4444;">🗑️ Delete</button>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="add-word-section">
-                    <input type="text" id="newWordInput" class="add-word-input" placeholder="Enter a new word..." onkeypress="if(event.key==='Enter')addWord()">
+                    <input type="text" id="newWordInput" class="add-word-input" placeholder="Enter a new word..." onkeypress="if(event.key==='Enter')addWord()" onfocus="scrollInputIntoView(this)">
                     <button class="add-btn" onclick="addWord()">+ Add</button>
                 </div>
                 <ul class="word-list" id="wordListContainer">
@@ -1472,6 +1477,20 @@ app.get('/', (req, res) => {
                 updateAllViews();
                 alert('Word statistics have been reset successfully!');
             }
+        }
+        
+        // Mobile keyboard handling - scroll input into view when focused
+        function scrollInputIntoView(element) {
+            // Delay to allow the mobile keyboard animation to complete before scrolling.
+            // Most mobile browsers take 200-300ms to animate the keyboard appearance.
+            const KEYBOARD_ANIMATION_DELAY = 300;
+            setTimeout(() => {
+                element.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center',
+                    inline: 'nearest'
+                });
+            }, KEYBOARD_ANIMATION_DELAY);
         }
     </script>
 </body>
