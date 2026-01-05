@@ -525,8 +525,8 @@ app.get('/', (req, res) => {
                             <div class="word" id="currentWord"></div>
                         </div>
                         <div class="button-group">
-                            <button class="pass-btn" onclick="nextWord('pass')">✓ Pass</button>
-                            <button class="fail-btn" onclick="nextWord('fail')">✗ Fail</button>
+                            <button class="pass-btn" onclick="nextWord('pass')">Great Job!</button>
+                            <button class="fail-btn" onclick="nextWord('fail')">Try Again</button>
                         </div>
                         <p class="info" id="cardInfo"></p>
                     </div>
