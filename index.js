@@ -1479,14 +1479,16 @@ app.get('/', (req, res) => {
         
         // Mobile keyboard handling - scroll input into view when focused
         function scrollInputIntoView(element) {
-            // Use a small timeout to allow the keyboard to appear first
+            // Delay to allow the mobile keyboard animation to complete before scrolling.
+            // Most mobile browsers take 200-300ms to animate the keyboard appearance.
+            const KEYBOARD_ANIMATION_DELAY = 300;
             setTimeout(() => {
                 element.scrollIntoView({ 
                     behavior: 'smooth', 
                     block: 'center',
                     inline: 'nearest'
                 });
-            }, 300);
+            }, KEYBOARD_ANIMATION_DELAY);
         }
     </script>
 </body>
