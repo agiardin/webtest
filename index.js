@@ -1039,6 +1039,13 @@ app.get('/', (req, res) => {
                     cellDiv.onclick = null;
                 }
                 
+                // Disable interaction for plants at final stage (stage 3)
+                if (cell !== null && cell.stage >= 3) {
+                    cellDiv.style.cursor = 'not-allowed';
+                    cellDiv.style.opacity = '0.7';
+                    cellDiv.onclick = null;
+                }
+                
                 if (cell === null) {
                     cellDiv.textContent = '+';
                 } else {
@@ -1144,6 +1151,11 @@ app.get('/', (req, res) => {
             if (garden[cellIndex]) {
                 const plant = garden[cellIndex];
                 const plantType = PLANT_TYPES[plant.type];
+                
+                // Don't allow watering plants at final stage (stage 3)
+                if (plant.stage >= 3) {
+                    return;
+                }
                 
                 // Progress to next stage (max stage is 3: 0=sprout, 1=sapling, 2=mature, 3=flowering)
                 if (plant.stage < 3) {
