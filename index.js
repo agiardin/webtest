@@ -500,15 +500,15 @@ app.get('/', (req, res) => {
 <body>
     <div class="app-container">
         <nav class="nav-bar">
-            <button class="nav-btn active" onclick="showPage('testing', event)">📝 Testing</button>
-            <button class="nav-btn" onclick="showPage('wordlist', event)">⚙️ Settings</button>
+            <button class="nav-btn" onclick="showPage('testing', event)">📝 Testing</button>
+            <button class="nav-btn active" onclick="showPage('wordlist', event)">⚙️ Settings</button>
             <button class="nav-btn" onclick="showPage('progress', event)">📊 Progress</button>
             <button class="nav-btn" onclick="showPage('dopamine', event)">🌱 Garden</button>
         </nav>
         
         <div class="container">
             <!-- Testing Page -->
-            <div id="testingPage" class="page active">
+            <div id="testingPage" class="page">
                 <h1>📝 Testing</h1>
                 
                 <div class="flashcard-section">
@@ -529,7 +529,7 @@ app.get('/', (req, res) => {
             </div>
             
             <!-- Settings Page -->
-            <div id="wordlistPage" class="page">
+            <div id="wordlistPage" class="page active">
                 <h1>⚙️ Settings</h1>
                 
                 <!-- Word List Selector Section -->
@@ -648,7 +648,7 @@ app.get('/', (req, res) => {
     <script>
         let words = [];
         let currentWordObj = null;
-        let currentPage = 'testing';
+        let currentPage = 'wordlist';
         let garden = [];
         let selectedCellIndex = null;
         let punishMode = false; // Whether to punish wrong answers by burning plants
