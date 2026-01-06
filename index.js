@@ -1397,6 +1397,12 @@ app.get('/', (req, res) => {
         }
 
         // Testing Page
+        function showAllDoneState() {
+            allDoneForToday = true;
+            gardenActionAllowed = false;
+            showPage('dopamine'); // Show garden page with "all done" message
+        }
+        
         function updateTestingView() {
             const activeWords = words.filter(w => w.active);
             
@@ -1415,9 +1421,7 @@ app.get('/', (req, res) => {
             
             // If no words are due, show "all done" message
             if (dueWords.length === 0) {
-                allDoneForToday = true;
-                gardenActionAllowed = false;
-                showPage('dopamine'); // Show garden page
+                showAllDoneState();
                 return;
             }
             
@@ -1453,9 +1457,7 @@ app.get('/', (req, res) => {
             
             // If no words are due, show garden page with "all done" message
             if (dueWords.length === 0) {
-                allDoneForToday = true;
-                gardenActionAllowed = false; // No garden action allowed when all done
-                showPage('dopamine'); // Dopamine page is the garden page
+                showAllDoneState();
                 return;
             }
             
