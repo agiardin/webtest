@@ -1498,9 +1498,11 @@ app.get('/', (req, res) => {
             const now = getEffectiveNow();
             const dueWords = activeWords.filter(w => new Date(w.nextSeenDate) <= now);
             
-            // If no words are due, show "all done" message
+            // If no words are due, navigate to garden only if currently on the testing page
             if (dueWords.length === 0) {
-                showAllDoneState();
+                if (currentPage === 'testing') {
+                    showAllDoneState();
+                }
                 return;
             }
             
@@ -1534,9 +1536,11 @@ app.get('/', (req, res) => {
                 return nextSeen <= now;
             });
             
-            // If no words are due, show garden page with "all done" message
+            // If no words are due, navigate to garden only if currently on the testing page
             if (dueWords.length === 0) {
-                showAllDoneState();
+                if (currentPage === 'testing') {
+                    showAllDoneState();
+                }
                 return;
             }
             
