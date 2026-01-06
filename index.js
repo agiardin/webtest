@@ -550,11 +550,19 @@ app.get('/', (req, res) => {
                     <div class="settings-title">⚙️ Word Selection Settings</div>
                     <div class="setting-item">
                         <label class="setting-label">Auto-Advance:</label>
-                        <span class="setting-description">Automatically return to the testing page after 3 seconds when you successfully plant or water a plant in the garden.</span>
+                        <span class="setting-description">Automatically return to the testing page after a delay when you successfully plant or water a plant in the garden.</span>
                         <label class="checkbox-container">
                             <input type="checkbox" id="autoAdvanceCheckbox" onchange="updateAutoAdvance(this.checked)">
                             <span>Auto-advance from garden to testing</span>
                         </label>
+                    </div>
+                    <div class="setting-item">
+                        <label class="setting-label">Auto-Advance Delay:</label>
+                        <span class="setting-description">Time to wait before automatically returning to the testing page (in seconds).</span>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="number" min="1" max="10" step="0.5" value="2" id="autoAdvanceDelayInput" onchange="updateAutoAdvanceDelay(this.value)" style="flex: 1; padding: 0.5rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                            <span>seconds</span>
+                        </div>
                     </div>
                 </div>
                 
@@ -683,8 +691,9 @@ app.get('/', (req, res) => {
         let garden = [];
         let selectedCellIndex = null;
         let gardenActionAllowed = false; // Whether a garden action is allowed for the current correct answer
-        let autoAdvance = true; // Whether to auto-advance from garden to testing after 3 seconds
+        let autoAdvance = true; // Whether to auto-advance from garden to testing after configurable delay
         let autoAdvanceTimeout = null; // Timeout for auto-advance
+        let autoAdvanceDelay = 2000; // Delay in milliseconds before auto-advancing (default 2 seconds)
         let allDoneForToday = false; // Whether all words are done for today (no words due)
         
         // Word list management
@@ -739,9 +748,6 @@ app.get('/', (req, res) => {
         // Spaced repetition bucket delays (in days)
         let bucketDelays = [1, 3, 7, 28]; // Default delays for buckets 0, 1, 2, 3
         const MAX_BUCKET = 3; // Final bucket index
-        
-        // Animation constants
-        const AUTO_ADVANCE_DELAY = 3000; // milliseconds, delay before auto-advancing from garden to testing
         
         // Load saved data on page load
         window.addEventListener('DOMContentLoaded', () => {
@@ -1022,6 +1028,17 @@ app.get('/', (req, res) => {
                 autoAdvanceCheckbox.checked = autoAdvance;
             }
             
+            // Load auto-advance delay
+            const savedAutoAdvanceDelay = localStorage.getItem('autoAdvanceDelay');
+            if (savedAutoAdvanceDelay !== null) {
+                autoAdvanceDelay = parseInt(savedAutoAdvanceDelay, 10);
+            }
+            // Update the delay input if it exists
+            const autoAdvanceDelayInput = document.getElementById('autoAdvanceDelayInput');
+            if (autoAdvanceDelayInput) {
+                autoAdvanceDelayInput.value = autoAdvanceDelay / 1000; // Convert ms to seconds for display
+            }
+            
             // Load bucket delays
             const savedBucketDelays = localStorage.getItem('bucketDelays');
             if (savedBucketDelays !== null) {
@@ -1038,6 +1055,7 @@ app.get('/', (req, res) => {
         
         function saveSettings() {
             localStorage.setItem('autoAdvance', autoAdvance.toString());
+            localStorage.setItem('autoAdvanceDelay', autoAdvanceDelay.toString());
             localStorage.setItem('bucketDelays', JSON.stringify(bucketDelays));
         }
         
@@ -1053,6 +1071,16 @@ app.get('/', (req, res) => {
         
         function updateAutoAdvance(checked) {
             autoAdvance = checked;
+            saveSettings();
+        }
+        
+        function updateAutoAdvanceDelay(value) {
+            const seconds = parseFloat(value);
+            if (isNaN(seconds) || seconds < 1 || seconds > 10) {
+                alert('Please enter a valid number between 1 and 10 seconds (decimals allowed)');
+                return;
+            }
+            autoAdvanceDelay = Math.round(seconds * 1000); // Convert seconds to milliseconds
             saveSettings();
         }
         
@@ -1252,7 +1280,7 @@ app.get('/', (req, res) => {
             // Set timer to auto-advance to testing page
             autoAdvanceTimeout = setTimeout(() => {
                 continueTesting();
-            }, AUTO_ADVANCE_DELAY);
+            }, autoAdvanceDelay);
         }
 
         function addWord() {
