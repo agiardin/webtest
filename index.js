@@ -566,6 +566,40 @@ app.get('/', (req, res) => {
                     </div>
                 </div>
                 
+                <!-- Spaced Repetition Settings -->
+                <div class="settings-section">
+                    <div class="settings-title">📅 Spaced Repetition Settings</div>
+                    <span class="setting-description">Configure how long to wait before showing a word again after a correct answer. Each bucket represents a stage of learning.</span>
+                    <div class="setting-item">
+                        <label class="setting-label">Bucket 0 (New Words):</label>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="number" min="0" max="365" value="1" id="bucket0Input" onchange="updateBucketDelay(0, this.value)" style="flex: 1; padding: 0.5rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                            <span>days</span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label class="setting-label">Bucket 1 (Learning):</label>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="number" min="0" max="365" value="3" id="bucket1Input" onchange="updateBucketDelay(1, this.value)" style="flex: 1; padding: 0.5rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                            <span>days</span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label class="setting-label">Bucket 2 (Familiar):</label>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="number" min="0" max="365" value="7" id="bucket2Input" onchange="updateBucketDelay(2, this.value)" style="flex: 1; padding: 0.5rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                            <span>days</span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label class="setting-label">Bucket 3 (Mastered):</label>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="number" min="0" max="365" value="28" id="bucket3Input" onchange="updateBucketDelay(3, this.value)" style="flex: 1; padding: 0.5rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                            <span>days</span>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Data Management Section -->
                 <div class="settings-section">
                     <div class="settings-title">🔄 Data Management</div>
@@ -710,6 +744,10 @@ app.get('/', (req, res) => {
         const MIN_ATTEMPTS_FOR_LEARNED = 3;
         const MIN_ACCURACY_FOR_LEARNED = 0.8;
         
+        // Spaced repetition bucket delays (in days)
+        let bucketDelays = [1, 3, 7, 28]; // Default delays for buckets 0, 1, 2, 3
+        const MAX_BUCKET = 3; // Final bucket index
+        
         // Animation constants
         const BURN_ANIMATION_DURATION = 2000; // milliseconds, matches CSS animation
         const AUTO_ADVANCE_DELAY = 3000; // milliseconds, delay before auto-advancing from garden to testing
@@ -785,6 +823,13 @@ app.get('/', (req, res) => {
                 wordLists = JSON.parse(saved);
                 currentListId = savedCurrentListId;
                 
+                // Migrate words to new time-based structure if needed
+                wordLists.forEach(list => {
+                    if (list.words) {
+                        list.words = list.words.map(word => migrateWord(word));
+                    }
+                });
+                
                 // Verify current list exists
                 if (!wordLists.find(list => list.id === currentListId)) {
                     currentListId = wordLists.length > 0 ? wordLists[0].id : null;
@@ -799,7 +844,7 @@ app.get('/', (req, res) => {
                     const defaultList = {
                         id: 'list_' + Date.now(),
                         name: 'My Word List',
-                        words: oldWords ? JSON.parse(oldWords) : [],
+                        words: oldWords ? JSON.parse(oldWords).map(word => migrateWord(word)) : [],
                         garden: oldGarden ? JSON.parse(oldGarden) : Array(GRID_TOTAL_CELLS).fill(null)
                     };
                     wordLists = [defaultList];
@@ -826,6 +871,30 @@ app.get('/', (req, res) => {
             
             // Load current list data into global variables
             loadCurrentList();
+        }
+        
+        // Migrate word from old structure to new time-based structure
+        function migrateWord(word) {
+            // If word already has new structure, return it
+            if (word.hasOwnProperty('timesSeen') && word.hasOwnProperty('delayBucket') && word.hasOwnProperty('nextSeenDate')) {
+                return word;
+            }
+            
+            // Convert old structure to new
+            const now = new Date();
+            const migrated = {
+                word: word.word,
+                active: word.active !== undefined ? word.active : true,
+                timesSeen: 0, // Reset to 0 for fresh start
+                delayBucket: 0, // Start at bucket 0
+                nextSeenDate: now.toISOString() // Available immediately
+            };
+            
+            // Keep old data for reference (can be removed later)
+            if (word.correct !== undefined) migrated.correct = word.correct;
+            if (word.incorrect !== undefined) migrated.incorrect = word.incorrect;
+            
+            return migrated;
         }
         
         function loadCurrentList() {
@@ -982,12 +1051,36 @@ app.get('/', (req, res) => {
             if (autoAdvanceCheckbox) {
                 autoAdvanceCheckbox.checked = autoAdvance;
             }
+            
+            // Load bucket delays
+            const savedBucketDelays = localStorage.getItem('bucketDelays');
+            if (savedBucketDelays !== null) {
+                bucketDelays = JSON.parse(savedBucketDelays);
+            }
+            // Update bucket delay inputs if they exist
+            for (let i = 0; i <= MAX_BUCKET; i++) {
+                const input = document.getElementById(`bucket${i}Input`);
+                if (input) {
+                    input.value = bucketDelays[i];
+                }
+            }
         }
         
         function saveSettings() {
             localStorage.setItem('wordSelectionPoolPercent', wordSelectionPoolPercent.toString());
             localStorage.setItem('punishMode', punishMode.toString());
             localStorage.setItem('autoAdvance', autoAdvance.toString());
+            localStorage.setItem('bucketDelays', JSON.stringify(bucketDelays));
+        }
+        
+        function updateBucketDelay(bucketIndex, value) {
+            const days = parseInt(value, 10);
+            if (isNaN(days) || days < 0 || days > 365) {
+                alert('Please enter a valid number of days between 0 and 365');
+                return;
+            }
+            bucketDelays[bucketIndex] = days;
+            saveSettings();
         }
         
         function updatePoolPercent(value) {
@@ -1242,12 +1335,14 @@ app.get('/', (req, res) => {
                 return;
             }
             
-            // Add new word with initial stats
+            // Add new word with time-based structure
+            const now = new Date();
             words.push({
                 word: word,
-                correct: 0,
-                incorrect: 0,
-                active: true
+                active: true,
+                timesSeen: 0,
+                delayBucket: 0,
+                nextSeenDate: now.toISOString()
             });
             
             input.value = '';
@@ -1293,73 +1388,105 @@ app.get('/', (req, res) => {
                 return;
             }
             
+            const now = new Date();
+            
+            // Filter words that are due (nextSeenDate <= now)
+            const dueWords = activeWords.filter(w => {
+                const nextSeen = new Date(w.nextSeenDate);
+                return nextSeen <= now;
+            });
+            
+            // If no words are due, show the next word that will be due soonest
+            let availableWords;
+            if (dueWords.length === 0) {
+                // Sort by nextSeenDate and take the earliest
+                const sortedByDate = [...activeWords].sort((a, b) => {
+                    return new Date(a.nextSeenDate) - new Date(b.nextSeenDate);
+                });
+                availableWords = [sortedByDate[0]];
+            } else {
+                availableWords = dueWords;
+            }
+            
             // Filter out current word to avoid showing the same word twice in a row
-            let availableWords = activeWords.filter(w => w !== currentWordObj);
+            let candidateWords = availableWords.filter(w => w !== currentWordObj);
             
-            // If no other words available, use all active words
-            if (availableWords.length === 0) {
-                availableWords = activeWords;
+            // If no other words available, use all available words
+            if (candidateWords.length === 0) {
+                candidateWords = availableWords;
             }
             
-            // Prioritize words with more incorrect answers (higher error rate)
-            // Calculate error rate for each word
-            const wordsWithRate = availableWords.map(w => {
-                const total = w.correct + w.incorrect;
-                const errorRate = total === 0 ? 1 : w.incorrect / total;
-                return { word: w, errorRate, total };
-            });
+            // Select randomly from available words
+            const randomIndex = Math.floor(Math.random() * candidateWords.length);
+            currentWordObj = candidateWords[randomIndex];
             
-            // Sort by error rate (descending) and total attempts (ascending for tie-breaking)
-            wordsWithRate.sort((a, b) => {
-                if (b.errorRate !== a.errorRate) {
-                    return b.errorRate - a.errorRate;
-                }
-                return a.total - b.total;
-            });
-            
-            // Pick from configurable percentage with weighted random selection
-            const poolCount = Math.max(1, Math.ceil(wordsWithRate.length * (wordSelectionPoolPercent / 100)));
-            const topWords = wordsWithRate.slice(0, poolCount);
-            
-            // Weighted random selection (higher error rate = higher chance)
-            const totalWeight = topWords.reduce((sum, w) => sum + (w.errorRate + 0.1), 0);
-            let random = Math.random() * totalWeight;
-            
-            let selected = topWords[0].word;
-            for (const item of topWords) {
-                random -= (item.errorRate + 0.1);
-                if (random <= 0) {
-                    selected = item.word;
-                    break;
-                }
-            }
-            
-            currentWordObj = selected;
             document.getElementById('currentWord').textContent = currentWordObj.word;
             updateCardInfo();
         }
 
         function updateCardInfo() {
             const activeWords = words.filter(w => w.active);
-            const total = currentWordObj.correct + currentWordObj.incorrect;
-            const accuracy = total === 0 ? 0 : Math.round((currentWordObj.correct / total) * 100);
+            const now = new Date();
+            const dueWords = activeWords.filter(w => new Date(w.nextSeenDate) <= now);
+            
+            const bucketNames = ['New', 'Learning', 'Familiar', 'Mastered'];
+            const bucketName = bucketNames[currentWordObj.delayBucket] || `Bucket ${currentWordObj.delayBucket}`;
             
             document.getElementById('cardInfo').textContent = 
-                \`This word: \${currentWordObj.correct} correct, \${currentWordObj.incorrect} incorrect (\${accuracy}% accuracy) | Active cards: \${activeWords.length}\`;
+                `This word: Seen ${currentWordObj.timesSeen} times, ${bucketName} | Active cards: ${activeWords.length} | Due now: ${dueWords.length}`;
         }
 
         function nextWord(result) {
             if (!currentWordObj) return;
 
+            const now = new Date();
+            const isFirstSeen = currentWordObj.timesSeen === 0;
+
             if (result === 'pass') {
-                currentWordObj.correct++;
+                // Increment times seen
+                currentWordObj.timesSeen++;
+                
+                if (isFirstSeen) {
+                    // First time seeing the word: keep bucket 0, set nextSeenDate to now
+                    currentWordObj.nextSeenDate = now.toISOString();
+                } else {
+                    // Not first time: increment bucket
+                    currentWordObj.delayBucket++;
+                    
+                    // Check if we've reached the final bucket
+                    if (currentWordObj.delayBucket > MAX_BUCKET) {
+                        // Prompt user to remove from list
+                        if (confirm(`Congratulations! You've mastered "${currentWordObj.word}"! Would you like to remove it from your active list?`)) {
+                            removeWord(currentWordObj.word);
+                            saveWords();
+                            showNextWord();
+                            return;
+                        } else {
+                            // Keep at max bucket
+                            currentWordObj.delayBucket = MAX_BUCKET;
+                        }
+                    }
+                    
+                    // Set nextSeenDate to now + bucket delay
+                    const delayDays = bucketDelays[currentWordObj.delayBucket];
+                    const nextSeen = new Date(now);
+                    nextSeen.setDate(nextSeen.getDate() + delayDays);
+                    currentWordObj.nextSeenDate = nextSeen.toISOString();
+                }
+                
                 saveWords();
                 showNextWord(); // Select next word before showing garden
                 gardenActionAllowed = true; // Allow one garden action for correct answer
                 // Show dopamine page on correct answer
                 showPage('dopamine');
             } else if (result === 'fail') {
-                currentWordObj.incorrect++;
+                // Increment times seen
+                currentWordObj.timesSeen++;
+                
+                // Set bucket to 0 and nextSeenDate to now (may be asked again immediately)
+                currentWordObj.delayBucket = 0;
+                currentWordObj.nextSeenDate = now.toISOString();
+                
                 saveWords();
                 
                 // If punish mode is enabled, show garden and burn a plant
@@ -1395,48 +1522,73 @@ app.get('/', (req, res) => {
                 return;
             }
             
-            // Sort words by error rate (red/worst at top, green/best at bottom)
-            const sortedWords = [...activeWords].sort((a, b) => {
-                const totalA = a.correct + a.incorrect;
-                const totalB = b.correct + b.incorrect;
-                
-                // Words with no attempts go to the top (treated as needing practice)
-                if (totalA === 0 && totalB === 0) return 0;
-                if (totalA === 0) return -1;
-                if (totalB === 0) return 1;
-                
-                const errorRateA = a.incorrect / totalA;
-                const errorRateB = b.incorrect / totalB;
-                
-                return errorRateB - errorRateA;
-            });
+            const now = new Date();
             
-            container.innerHTML = sortedWords.map(w => {
-                const total = w.correct + w.incorrect;
-                const errorRate = total === 0 ? 1 : w.incorrect / total;
+            // Sort words by nextSeenDate (due first at top) and then by bucket (lower buckets first)
+            const sortedWords = [...activeWords].sort((a, b) => {
+                const nextSeenA = new Date(a.nextSeenDate);
+                const nextSeenB = new Date(b.nextSeenDate);
                 
-                // Calculate color based on error rate
-                // Red (high errors) to Yellow (medium) to Green (low errors)
-                let color;
-                if (total === 0) {
-                    color = '#e5e7eb'; // Gray for no attempts
-                } else if (errorRate > 0.6) {
-                    color = '#fee2e2'; // Light red
-                } else if (errorRate > 0.4) {
-                    color = '#fed7aa'; // Light orange
-                } else if (errorRate > 0.2) {
-                    color = '#fef3c7'; // Light yellow
-                } else {
-                    color = '#d1fae5'; // Light green
+                // If both are due now, sort by bucket (lower bucket = needs more practice)
+                if (nextSeenA <= now && nextSeenB <= now) {
+                    return a.delayBucket - b.delayBucket;
                 }
                 
-                const accuracy = total === 0 ? 'Not tested' : \`\${Math.round((w.correct / total) * 100)}% accuracy\`;
+                // Otherwise sort by due date
+                return nextSeenA - nextSeenB;
+            });
+            
+            const bucketNames = ['New', 'Learning', 'Familiar', 'Mastered'];
+            
+            container.innerHTML = sortedWords.map(w => {
+                const nextSeen = new Date(w.nextSeenDate);
+                const isDue = nextSeen <= now;
+                
+                // Calculate color based on bucket level and due status
+                let color;
+                if (isDue) {
+                    // Due words get more attention-grabbing colors based on bucket
+                    if (w.delayBucket === 0) {
+                        color = '#fee2e2'; // Light red for new/reset words
+                    } else if (w.delayBucket === 1) {
+                        color = '#fed7aa'; // Light orange for learning
+                    } else {
+                        color = '#fef3c7'; // Light yellow for familiar/mastered but due
+                    }
+                } else {
+                    // Not due words get calm colors based on bucket
+                    if (w.delayBucket === 0) {
+                        color = '#e5e7eb'; // Gray
+                    } else if (w.delayBucket === 1) {
+                        color = '#dbeafe'; // Light blue
+                    } else if (w.delayBucket === 2) {
+                        color = '#dcfce7'; // Very light green
+                    } else {
+                        color = '#d1fae5'; // Light green
+                    }
+                }
+                
+                const bucketName = bucketNames[w.delayBucket] || `Bucket ${w.delayBucket}`;
+                
+                // Format next seen date
+                let nextSeenText;
+                if (isDue) {
+                    nextSeenText = 'Due now';
+                } else {
+                    const diffMs = nextSeen - now;
+                    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+                    if (diffDays === 1) {
+                        nextSeenText = 'Due in 1 day';
+                    } else {
+                        nextSeenText = `Due in ${diffDays} days`;
+                    }
+                }
                 
                 return \`
                     <li class="word-item" style="background: \${color};">
                         <div>
                             <span class="word-name">\${w.word}</span>
-                            <span class="word-stats">\${w.correct} correct / \${w.incorrect} incorrect (\${accuracy})</span>
+                            <span class="word-stats">Seen \${w.timesSeen} times | \${bucketName} | \${nextSeenText}</span>
                         </div>
                         <button class="remove-btn" onclick="removeWord('\${w.word}')">✕</button>
                     </li>
@@ -1447,10 +1599,9 @@ app.get('/', (req, res) => {
         // Progress Report Page
         function updateProgressView() {
             const activeWords = words.filter(w => w.active);
+            // Consider a word "learned" if it has been seen at least 3 times and is at bucket 2 or higher
             const learnedWords = activeWords.filter(w => {
-                const total = w.correct + w.incorrect;
-                // Consider a word "learned" if it has been tested at least MIN_ATTEMPTS_FOR_LEARNED times and has >= MIN_ACCURACY_FOR_LEARNED accuracy
-                return total >= MIN_ATTEMPTS_FOR_LEARNED && (w.correct / total) >= MIN_ACCURACY_FOR_LEARNED;
+                return w.timesSeen >= MIN_ATTEMPTS_FOR_LEARNED && w.delayBucket >= 2;
             });
             
             const totalWords = activeWords.length;
@@ -1482,10 +1633,15 @@ app.get('/', (req, res) => {
         }
         
         function resetWordStatistics() {
-            if (confirm('Are you sure you want to reset all word statistics? This will clear all correct/incorrect counts and cannot be undone!')) {
+            if (confirm('Are you sure you want to reset all word statistics? This will reset all progress and cannot be undone!')) {
+                const now = new Date();
                 words.forEach(word => {
-                    word.correct = 0;
-                    word.incorrect = 0;
+                    word.timesSeen = 0;
+                    word.delayBucket = 0;
+                    word.nextSeenDate = now.toISOString();
+                    // Clean up old fields if they exist
+                    delete word.correct;
+                    delete word.incorrect;
                 });
                 saveWords();
                 updateAllViews();
