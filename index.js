@@ -1498,9 +1498,8 @@ app.get('/', (req, res) => {
             const now = getEffectiveNow();
             const dueWords = activeWords.filter(w => new Date(w.nextSeenDate) <= now);
             
-            // If no words are due, show "all done" message only if we're on the testing page
+            // If no words are due, navigate to garden only if currently on the testing page
             if (dueWords.length === 0) {
-                // Only navigate to garden if we're currently on the testing page
                 if (currentPage === 'testing') {
                     showAllDoneState();
                 }
@@ -1537,9 +1536,8 @@ app.get('/', (req, res) => {
                 return nextSeen <= now;
             });
             
-            // If no words are due, show garden page with "all done" message only if we're on the testing page
+            // If no words are due, navigate to garden only if currently on the testing page
             if (dueWords.length === 0) {
-                // Only navigate to garden if we're currently on the testing page
                 if (currentPage === 'testing') {
                     showAllDoneState();
                 }
