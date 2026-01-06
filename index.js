@@ -488,6 +488,29 @@ app.get('/', (req, res) => {
             color: #666;
             font-size: 0.9rem;
         }
+        .garden-info.completion-banner {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
         .continue-btn {
             background: #10b981;
             margin-top: 1rem;
@@ -1154,10 +1177,14 @@ app.get('/', (req, res) => {
             if (gardenInfo) {
                 if (allDoneForToday) {
                     gardenInfo.textContent = '🎉 All done for today! Great work! Come back tomorrow for more practice. 🌟';
-                } else if (gardenActionAllowed) {
-                    gardenInfo.textContent = '✨ Great job! Click an empty spot to plant, or water a plant to help it grow!';
+                    gardenInfo.classList.add('completion-banner');
                 } else {
-                    gardenInfo.textContent = '✅ Garden action completed! Click "Continue Testing" to answer more questions.';
+                    gardenInfo.classList.remove('completion-banner');
+                    if (gardenActionAllowed) {
+                        gardenInfo.textContent = '✨ Great job! Click an empty spot to plant, or water a plant to help it grow!';
+                    } else {
+                        gardenInfo.textContent = '✅ Garden action completed! Click "Continue Testing" to answer more questions.';
+                    }
                 }
             }
             
