@@ -1409,8 +1409,29 @@ app.get('/', (req, res) => {
             document.getElementById('noWordsMessage').style.display = 'none';
             document.getElementById('flashcardContent').style.display = 'block';
             
-            // Always call showNextWord to check if there are words due
-            // This will redirect to garden if no words are due
+            // Check if we have due words
+            const now = new Date();
+            const dueWords = activeWords.filter(w => new Date(w.nextSeenDate) <= now);
+            
+            // If no words are due, show "all done" message
+            if (dueWords.length === 0) {
+                allDoneForToday = true;
+                gardenActionAllowed = false;
+                showPage('dopamine'); // Show garden page
+                return;
+            }
+            
+            // Check if currentWordObj is valid for the current list and is still due
+            if (currentWordObj && currentWordObj.active && words.includes(currentWordObj)) {
+                const currentWordNextSeen = new Date(currentWordObj.nextSeenDate);
+                if (currentWordNextSeen <= now) {
+                    // Current word is still valid and due, just update the info
+                    updateCardInfo();
+                    return;
+                }
+            }
+            
+            // Need to select a new word
             showNextWord();
         }
 
@@ -1430,11 +1451,11 @@ app.get('/', (req, res) => {
                 return nextSeen <= now;
             });
             
-            // If no words are due, redirect to garden with "all done" message
+            // If no words are due, show garden page with "all done" message
             if (dueWords.length === 0) {
                 allDoneForToday = true;
                 gardenActionAllowed = false; // No garden action allowed when all done
-                showPage('dopamine');
+                showPage('dopamine'); // Dopamine page is the garden page
                 return;
             }
             
