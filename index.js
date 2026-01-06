@@ -1077,10 +1077,10 @@ app.get('/', (req, res) => {
         function updateAutoAdvanceDelay(value) {
             const seconds = parseFloat(value);
             if (isNaN(seconds) || seconds < 1 || seconds > 10) {
-                alert('Please enter a valid number of seconds between 1 and 10');
+                alert('Please enter a valid number between 1 and 10 seconds (decimals allowed)');
                 return;
             }
-            autoAdvanceDelay = seconds * 1000; // Convert seconds to milliseconds
+            autoAdvanceDelay = Math.round(seconds * 1000); // Convert seconds to milliseconds
             saveSettings();
         }
         
