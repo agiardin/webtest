@@ -345,7 +345,55 @@ app.get('/', (req, res) => {
             gap: 0.75rem;
             max-width: 600px;
             margin: 1.5rem auto;
-            padding: 0.5rem;
+            padding: 1.5rem;
+            /* Wooden fence styling */
+            background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #8B4513 100%);
+            border: 8px solid #654321;
+            border-radius: 8px;
+            box-shadow: 
+                inset 0 2px 4px rgba(0, 0, 0, 0.3),
+                0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        /* Wooden fence pickets effect */
+        .garden-grid::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            background: repeating-linear-gradient(
+                90deg,
+                #654321 0px,
+                #654321 8px,
+                #8B4513 8px,
+                #8B4513 10px,
+                transparent 10px,
+                transparent 50px
+            );
+            border-radius: 8px;
+            pointer-events: none;
+            z-index: -1;
+        }
+        /* Wood grain texture effect */
+        .garden-grid::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(101, 67, 33, 0.1) 2px,
+                    rgba(101, 67, 33, 0.1) 3px
+                );
+            pointer-events: none;
+            border-radius: 4px;
         }
         .garden-cell {
             aspect-ratio: 1;
