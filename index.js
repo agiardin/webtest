@@ -876,7 +876,9 @@ app.get('/', (req, res) => {
         // Migrate word from old structure to new time-based structure
         function migrateWord(word) {
             // If word already has new structure, return it
-            if (word.hasOwnProperty('timesSeen') && word.hasOwnProperty('delayBucket') && word.hasOwnProperty('nextSeenDate')) {
+            if (Object.prototype.hasOwnProperty.call(word, 'timesSeen') && 
+                Object.prototype.hasOwnProperty.call(word, 'delayBucket') && 
+                Object.prototype.hasOwnProperty.call(word, 'nextSeenDate')) {
                 return word;
             }
             
