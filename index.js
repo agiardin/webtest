@@ -734,6 +734,7 @@ app.get('/', (req, res) => {
         let gardenActionAllowed = false; // Whether a garden action is allowed for the current correct answer
         let autoAdvance = true; // Whether to auto-advance from garden to testing after 3 seconds
         let autoAdvanceTimeout = null; // Timeout for auto-advance
+        let allDoneForToday = false; // Whether all words are done for today (no words due)
         
         // Word list management
         let wordLists = []; // Array of {id, name, words, garden}
@@ -808,6 +809,11 @@ app.get('/', (req, res) => {
             if (autoAdvanceTimeout) {
                 clearTimeout(autoAdvanceTimeout);
                 autoAdvanceTimeout = null;
+            }
+            
+            // Reset allDoneForToday flag when navigating to testing page manually
+            if (pageName === 'testing') {
+                allDoneForToday = false;
             }
             
             // Hide all pages
@@ -1185,10 +1191,22 @@ app.get('/', (req, res) => {
             // Update info message based on whether action is allowed
             const gardenInfo = document.querySelector('.garden-info');
             if (gardenInfo) {
-                if (gardenActionAllowed) {
+                if (allDoneForToday) {
+                    gardenInfo.textContent = '🎉 All done for today! Great work! Come back tomorrow for more practice. 🌟';
+                } else if (gardenActionAllowed) {
                     gardenInfo.textContent = '✨ Great job! Click an empty spot to plant, or water a plant to help it grow!';
                 } else {
                     gardenInfo.textContent = '✅ Garden action completed! Click "Continue Testing" to answer more questions.';
+                }
+            }
+            
+            // Update Continue Testing button visibility and text
+            const continueBtn = document.querySelector('.continue-btn');
+            if (continueBtn) {
+                if (allDoneForToday) {
+                    continueBtn.style.display = 'none';
+                } else {
+                    continueBtn.style.display = 'block';
                 }
             }
         }
@@ -1391,12 +1409,9 @@ app.get('/', (req, res) => {
             document.getElementById('noWordsMessage').style.display = 'none';
             document.getElementById('flashcardContent').style.display = 'block';
             
-            // Check if currentWordObj is valid for the current list
-            if (!currentWordObj || !currentWordObj.active || !words.includes(currentWordObj)) {
-                showNextWord();
-            } else {
-                updateCardInfo();
-            }
+            // Always call showNextWord to check if there are words due
+            // This will redirect to garden if no words are due
+            showNextWord();
         }
 
         function showNextWord() {
@@ -1415,17 +1430,19 @@ app.get('/', (req, res) => {
                 return nextSeen <= now;
             });
             
-            // If no words are due, show the next word that will be due soonest
-            let availableWords;
+            // If no words are due, redirect to garden with "all done" message
             if (dueWords.length === 0) {
-                // Sort by nextSeenDate and take the earliest
-                const sortedByDate = [...activeWords].sort((a, b) => {
-                    return new Date(a.nextSeenDate) - new Date(b.nextSeenDate);
-                });
-                availableWords = [sortedByDate[0]];
-            } else {
-                availableWords = dueWords;
+                allDoneForToday = true;
+                gardenActionAllowed = false; // No garden action allowed when all done
+                showPage('dopamine');
+                return;
             }
+            
+            // Reset allDoneForToday flag since we have words to show
+            allDoneForToday = false;
+            
+            // Use due words
+            let availableWords = dueWords;
             
             // Filter out current word to avoid showing the same word twice in a row
             let candidateWords = availableWords.filter(w => w !== currentWordObj);
