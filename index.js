@@ -1191,7 +1191,8 @@ app.get('/', (req, res) => {
             // Load time offset
             const savedTimeOffsetDays = localStorage.getItem('timeOffsetDays');
             if (savedTimeOffsetDays !== null) {
-                timeOffsetDays = parseInt(savedTimeOffsetDays, 10);
+                const parsed = parseInt(savedTimeOffsetDays, 10);
+                timeOffsetDays = isNaN(parsed) ? 0 : parsed;
             }
             
             // Update UI
