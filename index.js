@@ -1041,7 +1041,6 @@ app.get('/', (req, res) => {
                 // Disable interaction for plants at final stage (stage 3)
                 if (cell !== null && cell.stage >= 3) {
                     cellDiv.style.cursor = 'not-allowed';
-                    cellDiv.style.opacity = '0.7';
                     cellDiv.onclick = null;
                 }
                 
