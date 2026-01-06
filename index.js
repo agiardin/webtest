@@ -346,16 +346,16 @@ app.get('/', (req, res) => {
             max-width: 600px;
             margin: 1.5rem auto;
             padding: 1.5rem;
-            /* Wooden fence styling */
-            background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #8B4513 100%);
-            border: 8px solid #654321;
+            /* White picket fence styling */
+            background: linear-gradient(135deg, #f8f8f8 0%, #ffffff 50%, #f8f8f8 100%);
+            border: 8px solid #e8e8e8;
             border-radius: 8px;
             box-shadow: 
                 inset 0 2px 4px rgba(0, 0, 0, 0.3),
                 0 4px 8px rgba(0, 0, 0, 0.2);
             position: relative;
         }
-        /* Wooden fence pickets effect */
+        /* White picket fence pickets effect */
         .garden-grid::before {
             content: '';
             position: absolute;
@@ -365,10 +365,10 @@ app.get('/', (req, res) => {
             bottom: -8px;
             background: repeating-linear-gradient(
                 90deg,
-                #654321 0px,
-                #654321 8px,
-                #8B4513 8px,
-                #8B4513 10px,
+                #e8e8e8 0px,
+                #e8e8e8 8px,
+                #f8f8f8 8px,
+                #f8f8f8 10px,
                 transparent 10px,
                 transparent 50px
             );
@@ -376,7 +376,7 @@ app.get('/', (req, res) => {
             pointer-events: none;
             z-index: -1;
         }
-        /* Wood grain texture effect */
+        /* Subtle grain texture effect for white pickets */
         .garden-grid::after {
             content: '';
             position: absolute;
@@ -389,8 +389,8 @@ app.get('/', (req, res) => {
                     90deg,
                     transparent,
                     transparent 2px,
-                    rgba(101, 67, 33, 0.1) 2px,
-                    rgba(101, 67, 33, 0.1) 3px
+                    rgba(200, 200, 200, 0.1) 2px,
+                    rgba(200, 200, 200, 0.1) 3px
                 );
             pointer-events: none;
             border-radius: 4px;
