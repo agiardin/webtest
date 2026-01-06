@@ -1059,12 +1059,14 @@ app.get('/', (req, res) => {
                     img.style.objectFit = 'contain';
                     cellDiv.appendChild(img);
                     
-                    // Show stage indicator with simple dots (stage 0=1 dot, stage 1=2 dots, stage 2=3 dots, stage 3=4 dots)
-                    const stageSpan = document.createElement('span');
-                    stageSpan.className = 'plant-size';
-                    const dots = '•'.repeat(Math.max(1, Math.min(cell.stage + 1, 4)));
-                    stageSpan.textContent = dots;
-                    cellDiv.appendChild(stageSpan);
+                    // Show "+" indicator if plant can be upgraded (stages 0-2)
+                    // Don't show anything for stage 3 (fully grown)
+                    if (cell.stage < 3) {
+                        const stageSpan = document.createElement('span');
+                        stageSpan.className = 'plant-size';
+                        stageSpan.textContent = '+';
+                        cellDiv.appendChild(stageSpan);
+                    }
                 }
                 
                 grid.appendChild(cellDiv);
