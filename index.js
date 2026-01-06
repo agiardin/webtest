@@ -496,46 +496,6 @@ app.get('/', (req, res) => {
             background: #059669;
         }
         
-        /* Flame animation styles */
-        .garden-cell.burning {
-            animation: shake 0.3s infinite, burn 2s forwards;
-        }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0) rotate(0deg); }
-            25% { transform: translateX(-5px) rotate(-5deg); }
-            75% { transform: translateX(5px) rotate(5deg); }
-        }
-        @keyframes burn {
-            0% { 
-                background: #f0f9ff;
-                border-color: #bfdbfe;
-            }
-            30% {
-                background: #fef3c7;
-                border-color: #fbbf24;
-            }
-            60% {
-                background: #fed7aa;
-                border-color: #f97316;
-            }
-            100% {
-                background: #fee2e2;
-                border-color: #ef4444;
-                opacity: 0;
-                transform: scale(0.5);
-            }
-        }
-        .garden-cell.burning::after {
-            content: '🔥';
-            position: absolute;
-            font-size: 4rem;
-            animation: flameFlicker 0.3s infinite;
-        }
-        @keyframes flameFlicker {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.1); }
-        }
-        
         /* Checkbox styles */
         .checkbox-container {
             display: flex;
@@ -589,16 +549,8 @@ app.get('/', (req, res) => {
                 <div class="settings-section">
                     <div class="settings-title">⚙️ Word Selection Settings</div>
                     <div class="setting-item">
-                        <label class="setting-label">Punishment Mode:</label>
-                        <span class="setting-description">When enabled, a wrong answer will burn one of your garden plants. Use this to add consequences for mistakes!</span>
-                        <label class="checkbox-container">
-                            <input type="checkbox" id="punishModeCheckbox" onchange="updatePunishMode(this.checked)">
-                            <span>Punish for wrong answers</span>
-                        </label>
-                    </div>
-                    <div class="setting-item">
                         <label class="setting-label">Auto-Advance:</label>
-                        <span class="setting-description">Automatically return to the testing page after 3 seconds when you plant or grow a plant in the garden, or when a plant burns down from a wrong answer.</span>
+                        <span class="setting-description">Automatically return to the testing page after 3 seconds when you plant or grow a plant in the garden.</span>
                         <label class="checkbox-container">
                             <input type="checkbox" id="autoAdvanceCheckbox" onchange="updateAutoAdvance(this.checked)">
                             <span>Auto-advance from garden to testing</span>
@@ -730,7 +682,6 @@ app.get('/', (req, res) => {
         let currentPage = 'wordlist';
         let garden = [];
         let selectedCellIndex = null;
-        let punishMode = false; // Whether to punish wrong answers by burning plants
         let gardenActionAllowed = false; // Whether a garden action is allowed for the current correct answer
         let autoAdvance = true; // Whether to auto-advance from garden to testing after 3 seconds
         let autoAdvanceTimeout = null; // Timeout for auto-advance
@@ -789,7 +740,6 @@ app.get('/', (req, res) => {
         const MAX_BUCKET = 3; // Final bucket index
         
         // Animation constants
-        const BURN_ANIMATION_DURATION = 2000; // milliseconds, matches CSS animation
         const AUTO_ADVANCE_DELAY = 3000; // milliseconds, delay before auto-advancing from garden to testing
         
         // Load saved data on page load
@@ -1055,17 +1005,6 @@ app.get('/', (req, res) => {
         }
         
         function loadSettings() {
-            // Load punish mode setting
-            const savedPunishMode = localStorage.getItem('punishMode');
-            if (savedPunishMode !== null) {
-                punishMode = savedPunishMode === 'true';
-            }
-            // Update the checkbox if it exists
-            const checkbox = document.getElementById('punishModeCheckbox');
-            if (checkbox) {
-                checkbox.checked = punishMode;
-            }
-            
             // Load auto-advance setting
             const savedAutoAdvance = localStorage.getItem('autoAdvance');
             if (savedAutoAdvance !== null) {
@@ -1092,7 +1031,6 @@ app.get('/', (req, res) => {
         }
         
         function saveSettings() {
-            localStorage.setItem('punishMode', punishMode.toString());
             localStorage.setItem('autoAdvance', autoAdvance.toString());
             localStorage.setItem('bucketDelays', JSON.stringify(bucketDelays));
         }
@@ -1104,11 +1042,6 @@ app.get('/', (req, res) => {
                 return;
             }
             bucketDelays[bucketIndex] = days;
-            saveSettings();
-        }
-        
-        function updatePunishMode(checked) {
-            punishMode = checked;
             saveSettings();
         }
         
@@ -1280,41 +1213,6 @@ app.get('/', (req, res) => {
                     startAutoAdvanceTimer();
                 }
             }
-        }
-        
-        function burnRandomPlant() {
-            // Find all cells with plants
-            const plantCells = garden.reduce((indices, cell, index) => {
-                if (cell !== null) indices.push(index);
-                return indices;
-            }, []);
-            
-            if (plantCells.length === 0) {
-                // No plants to burn, just continue
-                return;
-            }
-            
-            // Select a random plant
-            const randomIndex = plantCells[Math.floor(Math.random() * plantCells.length)];
-            
-            // Get the cell element
-            const grid = document.getElementById('gardenGrid');
-            const cellDiv = grid.children[randomIndex];
-            
-            // Add burning animation
-            cellDiv.classList.add('burning');
-            
-            // After animation completes, remove the plant
-            setTimeout(() => {
-                garden[randomIndex] = null;
-                saveGarden();
-                updateGardenView();
-                
-                // Start auto-advance timer if enabled
-                if (autoAdvance) {
-                    startAutoAdvanceTimer();
-                }
-            }, BURN_ANIMATION_DURATION);
         }
         
         function continueTesting() {
@@ -1507,15 +1405,7 @@ app.get('/', (req, res) => {
                 currentWordObj.nextSeenDate = now.toISOString();
                 
                 saveWords();
-                
-                // If punish mode is enabled, show garden and burn a plant
-                if (punishMode) {
-                    showNextWord(); // Select next word before showing garden
-                    showPage('dopamine');
-                    burnRandomPlant();
-                } else {
-                    showNextWord();
-                }
+                showNextWord();
             }
         }
 
