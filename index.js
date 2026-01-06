@@ -550,7 +550,7 @@ app.get('/', (req, res) => {
                     <div class="settings-title">⚙️ Word Selection Settings</div>
                     <div class="setting-item">
                         <label class="setting-label">Auto-Advance:</label>
-                        <span class="setting-description">Automatically return to the testing page after 3 seconds when you plant or grow a plant in the garden.</span>
+                        <span class="setting-description">Automatically return to the testing page after 3 seconds when you successfully plant or water a plant in the garden.</span>
                         <label class="checkbox-container">
                             <input type="checkbox" id="autoAdvanceCheckbox" onchange="updateAutoAdvance(this.checked)">
                             <span>Auto-advance from garden to testing</span>
