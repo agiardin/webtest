@@ -632,7 +632,7 @@ app.get('/', (req, res) => {
                 </div>
                 
                 <div class="add-word-section">
-                    <input type="text" id="newWordInput" class="add-word-input" placeholder="Enter a new word..." onkeypress="if(event.key==='Enter')addWord()" onfocus="scrollInputIntoView(this)">
+                    <input type="text" id="newWordInput" class="add-word-input" placeholder="Enter a new word..." onkeypress="if(event.key=='Enter')addWord()" onfocus="scrollInputIntoView(this)">
                     <button class="add-btn" onclick="addWord()">+ Add</button>
                 </div>
                 <ul class="word-list" id="wordListContainer">
@@ -730,7 +730,7 @@ app.get('/', (req, res) => {
                 stages: ['plants/daisy-0.svg', 'plants/daisy-1.svg', 'plants/daisy-2.svg', 'plants/daisy-3.svg']  // sprout, sapling, mature, flowering
             },
             'queenanne': {
-                name: "Queen Anne's Lace",
+                name: "Queen Annes Lace",
                 stages: ['plants/queenanne-0.svg', 'plants/queenanne-1.svg', 'plants/queenanne-2.svg', 'plants/queenanne-3.svg']  // sprout, sapling, mature, flowering
             }
         };
@@ -1002,7 +1002,7 @@ app.get('/', (req, res) => {
             const currentList = wordLists.find(list => list.id === currentListId);
             if (!currentList) return;
             
-            if (!confirm(\`Are you sure you want to delete "\${currentList.name}"? This cannot be undone!\`)) {
+            if (!confirm('Are you sure you want to delete "' + currentList.name + '"? This cannot be undone!')) {
                 return;
             }
             
@@ -1059,7 +1059,7 @@ app.get('/', (req, res) => {
             }
             // Update bucket delay inputs if they exist
             for (let i = 0; i <= MAX_BUCKET; i++) {
-                const input = document.getElementById(`bucket${i}Input`);
+                const input = document.getElementById('bucket' + i + 'Input');
                 if (input) {
                     input.value = bucketDelays[i];
                 }
@@ -1430,10 +1430,10 @@ app.get('/', (req, res) => {
             const dueWords = activeWords.filter(w => new Date(w.nextSeenDate) <= now);
             
             const bucketNames = ['New', 'Learning', 'Familiar', 'Mastered'];
-            const bucketName = bucketNames[currentWordObj.delayBucket] || `Bucket ${currentWordObj.delayBucket}`;
+            const bucketName = bucketNames[currentWordObj.delayBucket] || ('Bucket ' + currentWordObj.delayBucket);
             
             document.getElementById('cardInfo').textContent = 
-                `This word: Seen ${currentWordObj.timesSeen} times, ${bucketName} | Active cards: ${activeWords.length} | Due now: ${dueWords.length}`;
+                'This word: Seen ' + currentWordObj.timesSeen + ' times, ' + bucketName + ' | Active cards: ' + activeWords.length + ' | Due now: ' + dueWords.length;
         }
 
         function nextWord(result) {
@@ -1456,7 +1456,7 @@ app.get('/', (req, res) => {
                     // Check if we've reached the final bucket
                     if (currentWordObj.delayBucket > MAX_BUCKET) {
                         // Prompt user to remove from list
-                        if (confirm(`Congratulations! You've mastered "${currentWordObj.word}"! Would you like to remove it from your active list?`)) {
+                        if (confirm("Congratulations! You have mastered this word: " + currentWordObj.word + "! Would you like to remove it from your active list?")) {
                             removeWord(currentWordObj.word);
                             saveWords();
                             showNextWord();
@@ -1568,7 +1568,7 @@ app.get('/', (req, res) => {
                     }
                 }
                 
-                const bucketName = bucketNames[w.delayBucket] || `Bucket ${w.delayBucket}`;
+                const bucketName = bucketNames[w.delayBucket] || ('Bucket ' + w.delayBucket);
                 
                 // Format next seen date
                 let nextSeenText;
@@ -1580,19 +1580,17 @@ app.get('/', (req, res) => {
                     if (diffDays === 1) {
                         nextSeenText = 'Due in 1 day';
                     } else {
-                        nextSeenText = `Due in ${diffDays} days`;
+                        nextSeenText = 'Due in ' + diffDays + ' days';
                     }
                 }
                 
-                return \`
-                    <li class="word-item" style="background: \${color};">
-                        <div>
-                            <span class="word-name">\${w.word}</span>
-                            <span class="word-stats">Seen \${w.timesSeen} times | \${bucketName} | \${nextSeenText}</span>
-                        </div>
-                        <button class="remove-btn" onclick="removeWord('\${w.word}')">✕</button>
-                    </li>
-                \`;
+                return '<li class="word-item" style="background: ' + color + ';">' +
+                    '<div>' +
+                        '<span class="word-name">' + w.word + '</span>' +
+                        '<span class="word-stats">Seen ' + w.timesSeen + ' times | ' + bucketName + ' | ' + nextSeenText + '</span>' +
+                    '</div>' +
+                    '<button class="remove-btn" onclick="removeWord(\\'' + w.word.split("'").join("\\\\'") + '\\')">✕</button>' +
+                    '</li>';
             }).join('');
         }
 
