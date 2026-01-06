@@ -541,14 +541,6 @@ app.get('/', (req, res) => {
                 <div class="settings-section">
                     <div class="settings-title">⚙️ Word Selection Settings</div>
                     <div class="setting-item">
-                        <label class="setting-label">Word Selection Pool:</label>
-                        <span class="setting-description">Control how many words are in the selection pool. Lower values focus more on difficult words, higher values give all words more equal chances.</span>
-                        <div class="slider-container">
-                            <input type="range" min="10" max="100" value="50" class="slider" id="poolPercentSlider" oninput="updatePoolPercent(this.value)">
-                            <span class="slider-value" id="poolPercentDisplay">50%</span>
-                        </div>
-                    </div>
-                    <div class="setting-item">
                         <label class="setting-label">Punishment Mode:</label>
                         <span class="setting-description">When enabled, a wrong answer will burn one of your garden plants. Use this to add consequences for mistakes!</span>
                         <label class="checkbox-container">
@@ -752,9 +744,6 @@ app.get('/', (req, res) => {
         const BURN_ANIMATION_DURATION = 2000; // milliseconds, matches CSS animation
         const AUTO_ADVANCE_DELAY = 3000; // milliseconds, delay before auto-advancing from garden to testing
         
-        // Word selection configuration
-        let wordSelectionPoolPercent = 50; // Default to 50% of words in selection pool
-
         // Load saved data on page load
         window.addEventListener('DOMContentLoaded', () => {
             loadWordLists();
@@ -1018,20 +1007,6 @@ app.get('/', (req, res) => {
         }
         
         function loadSettings() {
-            const savedPoolPercent = localStorage.getItem('wordSelectionPoolPercent');
-            if (savedPoolPercent !== null) {
-                wordSelectionPoolPercent = parseInt(savedPoolPercent, 10);
-            }
-            // Update the slider if it exists
-            const slider = document.getElementById('poolPercentSlider');
-            if (slider) {
-                slider.value = wordSelectionPoolPercent;
-            }
-            const display = document.getElementById('poolPercentDisplay');
-            if (display) {
-                display.textContent = wordSelectionPoolPercent + '%';
-            }
-            
             // Load punish mode setting
             const savedPunishMode = localStorage.getItem('punishMode');
             if (savedPunishMode !== null) {
@@ -1069,7 +1044,6 @@ app.get('/', (req, res) => {
         }
         
         function saveSettings() {
-            localStorage.setItem('wordSelectionPoolPercent', wordSelectionPoolPercent.toString());
             localStorage.setItem('punishMode', punishMode.toString());
             localStorage.setItem('autoAdvance', autoAdvance.toString());
             localStorage.setItem('bucketDelays', JSON.stringify(bucketDelays));
@@ -1082,12 +1056,6 @@ app.get('/', (req, res) => {
                 return;
             }
             bucketDelays[bucketIndex] = days;
-            saveSettings();
-        }
-        
-        function updatePoolPercent(value) {
-            wordSelectionPoolPercent = parseInt(value, 10);
-            document.getElementById('poolPercentDisplay').textContent = wordSelectionPoolPercent + '%';
             saveSettings();
         }
         
