@@ -613,6 +613,33 @@ app.get('/', (req, res) => {
                     </div>
                 </div>
                 
+                <!-- Developer Settings Section -->
+                <div class="settings-section" id="developerSettingsSection">
+                    <div class="settings-title">🔧 Developer Settings</div>
+                    <div id="developerLocked" class="setting-item">
+                        <span class="setting-description">Enter password to unlock developer settings.</span>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                            <input type="password" id="developerPasswordInput" placeholder="Enter password" style="flex: 1; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;" onkeypress="if(event.key=='Enter')unlockDeveloperSettings()">
+                            <button onclick="unlockDeveloperSettings()">🔓 Unlock</button>
+                        </div>
+                        <div id="developerPasswordError" style="color: #ef4444; font-size: 0.85rem; margin-top: 0.5rem; display: none;">Incorrect password</div>
+                    </div>
+                    <div id="developerUnlocked" class="setting-item" style="display: none;">
+                        <label class="setting-label">Time Offset:</label>
+                        <span class="setting-description">Artificially advance the current date/time for testing purposes. This affects when words become due.</span>
+                        <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem;">
+                            <input type="number" min="0" max="365" step="1" value="0" id="timeOffsetDaysInput" onchange="updateTimeOffset(this.value)" style="flex: 1; padding: 0.5rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                            <span>days forward</span>
+                        </div>
+                        <div style="margin-top: 0.5rem; color: #666; font-size: 0.85rem;">
+                            <strong>Current effective date/time:</strong> <span id="effectiveDateTime">-</span>
+                        </div>
+                        <div style="margin-top: 0.5rem;">
+                            <button onclick="lockDeveloperSettings()" style="background: #ef4444;">🔒 Lock Settings</button>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Word List Selector Section -->
                 <div class="settings-section">
                     <div class="settings-title">📚 Word Lists</div>
@@ -696,6 +723,11 @@ app.get('/', (req, res) => {
         let autoAdvanceDelay = 2000; // Delay in milliseconds before auto-advancing (default 2 seconds)
         let allDoneForToday = false; // Whether all words are done for today (no words due)
         
+        // Developer settings
+        let developerUnlocked = false; // Whether developer settings are unlocked
+        let timeOffsetDays = 0; // Number of days to offset the current time
+        const DEVELOPER_PASSWORD = 'cats'; // Password to unlock developer settings
+        
         // Word list management
         let wordLists = []; // Array of {id, name, words, garden}
         let currentListId = null; // ID of currently active list
@@ -748,6 +780,16 @@ app.get('/', (req, res) => {
         // Spaced repetition bucket delays (in days)
         let bucketDelays = [1, 3, 7, 28]; // Default delays for buckets 0, 1, 2, 3
         const MAX_BUCKET = 3; // Final bucket index
+        
+        // Get the effective current date/time (with time offset applied)
+        function getEffectiveNow() {
+            const now = new Date();
+            if (timeOffsetDays > 0) {
+                const offsetMs = timeOffsetDays * 24 * 60 * 60 * 1000;
+                return new Date(now.getTime() + offsetMs);
+            }
+            return now;
+        }
         
         // Load saved data on page load
         window.addEventListener('DOMContentLoaded', () => {
@@ -882,7 +924,7 @@ app.get('/', (req, res) => {
             }
             
             // Convert old structure to new
-            const now = new Date();
+            const now = getEffectiveNow();
             const migrated = {
                 word: word.word,
                 active: word.active !== undefined ? word.active : true,
@@ -1051,6 +1093,9 @@ app.get('/', (req, res) => {
                     input.value = bucketDelays[i];
                 }
             }
+            
+            // Load developer settings
+            loadDeveloperSettings();
         }
         
         function saveSettings() {
@@ -1082,6 +1127,86 @@ app.get('/', (req, res) => {
             }
             autoAdvanceDelay = Math.round(seconds * 1000); // Convert seconds to milliseconds
             saveSettings();
+        }
+        
+        // Developer Settings Functions
+        function unlockDeveloperSettings() {
+            const passwordInput = document.getElementById('developerPasswordInput');
+            const password = passwordInput.value;
+            const errorDiv = document.getElementById('developerPasswordError');
+            
+            if (password === DEVELOPER_PASSWORD) {
+                developerUnlocked = true;
+                document.getElementById('developerLocked').style.display = 'none';
+                document.getElementById('developerUnlocked').style.display = 'block';
+                passwordInput.value = '';
+                errorDiv.style.display = 'none';
+                saveDeveloperSettings();
+                updateEffectiveDateTimeDisplay();
+            } else {
+                errorDiv.style.display = 'block';
+                passwordInput.value = '';
+            }
+        }
+        
+        function lockDeveloperSettings() {
+            developerUnlocked = false;
+            document.getElementById('developerLocked').style.display = 'block';
+            document.getElementById('developerUnlocked').style.display = 'none';
+            saveDeveloperSettings();
+        }
+        
+        function updateTimeOffset(value) {
+            const days = parseInt(value, 10);
+            if (isNaN(days) || days < 0 || days > 365) {
+                alert('Please enter a valid number of days between 0 and 365');
+                return;
+            }
+            timeOffsetDays = days;
+            saveDeveloperSettings();
+            updateEffectiveDateTimeDisplay();
+            updateAllViews(); // Refresh all views to reflect the new time offset
+        }
+        
+        function updateEffectiveDateTimeDisplay() {
+            const effectiveDateTimeSpan = document.getElementById('effectiveDateTime');
+            if (effectiveDateTimeSpan) {
+                const effectiveNow = getEffectiveNow();
+                effectiveDateTimeSpan.textContent = effectiveNow.toLocaleString();
+            }
+        }
+        
+        function saveDeveloperSettings() {
+            localStorage.setItem('developerUnlocked', developerUnlocked.toString());
+            localStorage.setItem('timeOffsetDays', timeOffsetDays.toString());
+        }
+        
+        function loadDeveloperSettings() {
+            // Load developer unlocked state
+            const savedDeveloperUnlocked = localStorage.getItem('developerUnlocked');
+            if (savedDeveloperUnlocked !== null) {
+                developerUnlocked = savedDeveloperUnlocked === 'true';
+            }
+            
+            // Load time offset
+            const savedTimeOffsetDays = localStorage.getItem('timeOffsetDays');
+            if (savedTimeOffsetDays !== null) {
+                timeOffsetDays = parseInt(savedTimeOffsetDays, 10);
+            }
+            
+            // Update UI
+            if (developerUnlocked) {
+                document.getElementById('developerLocked').style.display = 'none';
+                document.getElementById('developerUnlocked').style.display = 'block';
+                const timeOffsetInput = document.getElementById('timeOffsetDaysInput');
+                if (timeOffsetInput) {
+                    timeOffsetInput.value = timeOffsetDays;
+                }
+                updateEffectiveDateTimeDisplay();
+            } else {
+                document.getElementById('developerLocked').style.display = 'block';
+                document.getElementById('developerUnlocked').style.display = 'none';
+            }
         }
         
         // Word List Selector Management
@@ -1299,7 +1424,7 @@ app.get('/', (req, res) => {
             }
             
             // Add new word with time-based structure
-            const now = new Date();
+            const now = getEffectiveNow();
             words.push({
                 word: word,
                 active: true,
@@ -1342,7 +1467,7 @@ app.get('/', (req, res) => {
             document.getElementById('flashcardContent').style.display = 'block';
             
             // Check if we have due words
-            const now = new Date();
+            const now = getEffectiveNow();
             const dueWords = activeWords.filter(w => new Date(w.nextSeenDate) <= now);
             
             // If no words are due, show "all done" message
@@ -1373,7 +1498,7 @@ app.get('/', (req, res) => {
                 return;
             }
             
-            const now = new Date();
+            const now = getEffectiveNow();
             
             // Filter words that are due (nextSeenDate <= now)
             const dueWords = activeWords.filter(w => {
@@ -1411,7 +1536,7 @@ app.get('/', (req, res) => {
 
         function updateCardInfo() {
             const activeWords = words.filter(w => w.active);
-            const now = new Date();
+            const now = getEffectiveNow();
             const dueWords = activeWords.filter(w => new Date(w.nextSeenDate) <= now);
             
             const bucketNames = ['New', 'Learning', 'Familiar', 'Mastered'];
@@ -1424,7 +1549,7 @@ app.get('/', (req, res) => {
         function nextWord(result) {
             if (!currentWordObj) return;
 
-            const now = new Date();
+            const now = getEffectiveNow();
             const isFirstSeen = currentWordObj.timesSeen === 0;
 
             if (result === 'pass') {
@@ -1499,7 +1624,7 @@ app.get('/', (req, res) => {
                 return;
             }
             
-            const now = new Date();
+            const now = getEffectiveNow();
             
             // Sort words by nextSeenDate (due first at top) and then by bucket (lower buckets first)
             const sortedWords = [...activeWords].sort((a, b) => {
@@ -1609,7 +1734,7 @@ app.get('/', (req, res) => {
         
         function resetWordStatistics() {
             if (confirm('Are you sure you want to reset all word statistics? This will reset all progress and cannot be undone!')) {
-                const now = new Date();
+                const now = getEffectiveNow();
                 words.forEach(word => {
                     word.timesSeen = 0;
                     word.delayBucket = 0;
