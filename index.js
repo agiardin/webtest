@@ -890,35 +890,35 @@ app.get('/', (req, res) => {
         const PLANT_TYPES = {
             'sunflower': {
                 name: 'Sunflower',
-                stages: ['plants/sunflower-0.svg', 'plants/sunflower-1.svg', 'plants/sunflower-2.svg', 'plants/sunflower-3.svg']  // sprout, sapling, mature, flowering
+                stages: ['/plants/sunflower-0.svg', '/plants/sunflower-1.svg', '/plants/sunflower-2.svg', '/plants/sunflower-3.svg']  // sprout, sapling, mature, flowering
             },
             'pine': {
                 name: 'Pine Tree',
-                stages: ['plants/pine-0.svg', 'plants/pine-1.svg', 'plants/pine-2.svg', 'plants/pine-3.svg']  // sprout, sapling, mature, with pinecones
+                stages: ['/plants/pine-0.svg', '/plants/pine-1.svg', '/plants/pine-2.svg', '/plants/pine-3.svg']  // sprout, sapling, mature, with pinecones
             },
             'oak': {
                 name: 'Oak Tree',
-                stages: ['plants/oak-0.svg', 'plants/oak-1.svg', 'plants/oak-2.svg', 'plants/oak-3.svg']  // sprout, sapling, mature, full grown
+                stages: ['/plants/oak-0.svg', '/plants/oak-1.svg', '/plants/oak-2.svg', '/plants/oak-3.svg']  // sprout, sapling, mature, full grown
             },
             'rose': {
                 name: 'Rose Bush',
-                stages: ['plants/rose-0.svg', 'plants/rose-1.svg', 'plants/rose-2.svg', 'plants/rose-3.svg']  // sprout, sapling, mature, flowering
+                stages: ['/plants/rose-0.svg', '/plants/rose-1.svg', '/plants/rose-2.svg', '/plants/rose-3.svg']  // sprout, sapling, mature, flowering
             },
             'crepe': {
                 name: 'Crepe Myrtle',
-                stages: ['plants/crepe-0.svg', 'plants/crepe-1.svg', 'plants/crepe-2.svg', 'plants/crepe-3.svg']  // sprout, sapling, mature, flowering
+                stages: ['/plants/crepe-0.svg', '/plants/crepe-1.svg', '/plants/crepe-2.svg', '/plants/crepe-3.svg']  // sprout, sapling, mature, flowering
             },
             'dogwood': {
                 name: 'Dogwood Tree',
-                stages: ['plants/dogwood-0.svg', 'plants/dogwood-1.svg', 'plants/dogwood-2.svg', 'plants/dogwood-3.svg']  // sprout, sapling, mature, flowering
+                stages: ['/plants/dogwood-0.svg', '/plants/dogwood-1.svg', '/plants/dogwood-2.svg', '/plants/dogwood-3.svg']  // sprout, sapling, mature, flowering
             },
             'daisy': {
                 name: 'Daisy',
-                stages: ['plants/daisy-0.svg', 'plants/daisy-1.svg', 'plants/daisy-2.svg', 'plants/daisy-3.svg']  // sprout, sapling, mature, flowering
+                stages: ['/plants/daisy-0.svg', '/plants/daisy-1.svg', '/plants/daisy-2.svg', '/plants/daisy-3.svg']  // sprout, sapling, mature, flowering
             },
             'queenanne': {
                 name: "Queen Annes Lace",
-                stages: ['plants/queenanne-0.svg', 'plants/queenanne-1.svg', 'plants/queenanne-2.svg', 'plants/queenanne-3.svg']  // sprout, sapling, mature, flowering
+                stages: ['/plants/queenanne-0.svg', '/plants/queenanne-1.svg', '/plants/queenanne-2.svg', '/plants/queenanne-3.svg']  // sprout, sapling, mature, flowering
             }
         };
         
@@ -934,18 +934,18 @@ app.get('/', (req, res) => {
         
         // Decoration types for sandcastle
         const DECORATION_TYPES = {
-            'sand_dollar': { name: 'Sand Dollar', image: 'sandcastle/sand-dollar.svg', isFlag: false },
-            'purple_starfish': { name: 'Purple Starfish', image: 'sandcastle/starfish.svg', isFlag: false },
-            'green_seaweed': { name: 'Green Seaweed', image: 'sandcastle/seaweed.svg', isFlag: false },
-            'conch_shell': { name: 'Conch Shell', image: 'sandcastle/conch-shell.svg', isFlag: false },
-            'red_crab': { name: 'Red Crab', image: 'sandcastle/crab.svg', isFlag: false },
-            'clam_shell': { name: 'Clam Shell', image: 'sandcastle/clam-shell.svg', isFlag: false },
-            'green_turtle': { name: 'Green Turtle', image: 'sandcastle/turtle.svg', isFlag: false },
-            'rainbow_flag': { name: 'Rainbow Flag', image: 'sandcastle/flag-rainbow.svg', isFlag: true },
-            'sunshine_flag': { name: 'Sunshine Flag', image: 'sandcastle/flag-sunshine.svg', isFlag: true },
-            'purple_flag': { name: 'Purple Flag', image: 'sandcastle/flag-purple.svg', isFlag: true },
-            'red_flag': { name: 'Red Flag', image: 'sandcastle/flag-red.svg', isFlag: true },
-            'yellow_flag': { name: 'Yellow Flag', image: 'sandcastle/flag-yellow.svg', isFlag: true }
+            'sand_dollar': { name: 'Sand Dollar', image: '/sandcastle/sand-dollar.svg', isFlag: false },
+            'purple_starfish': { name: 'Purple Starfish', image: '/sandcastle/starfish.svg', isFlag: false },
+            'green_seaweed': { name: 'Green Seaweed', image: '/sandcastle/seaweed.svg', isFlag: false },
+            'conch_shell': { name: 'Conch Shell', image: '/sandcastle/conch-shell.svg', isFlag: false },
+            'red_crab': { name: 'Red Crab', image: '/sandcastle/crab.svg', isFlag: false },
+            'clam_shell': { name: 'Clam Shell', image: '/sandcastle/clam-shell.svg', isFlag: false },
+            'green_turtle': { name: 'Green Turtle', image: '/sandcastle/turtle.svg', isFlag: false },
+            'rainbow_flag': { name: 'Rainbow Flag', image: '/sandcastle/flag-rainbow.svg', isFlag: true },
+            'sunshine_flag': { name: 'Sunshine Flag', image: '/sandcastle/flag-sunshine.svg', isFlag: true },
+            'purple_flag': { name: 'Purple Flag', image: '/sandcastle/flag-purple.svg', isFlag: true },
+            'red_flag': { name: 'Red Flag', image: '/sandcastle/flag-red.svg', isFlag: true },
+            'yellow_flag': { name: 'Yellow Flag', image: '/sandcastle/flag-yellow.svg', isFlag: true }
         };
         
         // Learning criteria constants
