@@ -1,0 +1,16 @@
+<svg width="60" height="80" viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Red Flag on Post -->
+  <!-- Flag post -->
+  <rect x="8" y="5" width="3" height="70" fill="#8B4513" stroke="#654321" stroke-width="1"/>
+  <!-- Flag -->
+  <g transform="translate(11, 5)">
+    <!-- Flag background -->
+    <rect x="0" y="0" width="35" height="24" fill="#E74C3C" stroke="#C0392B" stroke-width="1"/>
+    <!-- Warning symbol -->
+    <circle cx="17.5" cy="12" r="7" fill="none" stroke="#FDFEFE" stroke-width="2"/>
+    <line x1="17.5" y1="8" x2="17.5" y2="13" stroke="#FDFEFE" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="17.5" cy="15.5" r="0.8" fill="#FDFEFE"/>
+    <!-- Wavy edge -->
+    <path d="M 35,0 Q 37,6 35,12 Q 37,18 35,24 L 35,0" fill="#CB4335" stroke="#C0392B" stroke-width="0.5"/>
+  </g>
+</svg>

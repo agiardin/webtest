@@ -1,0 +1,25 @@
+<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+  <!-- Green Seaweed -->
+  <g>
+    <!-- Left strand -->
+    <path d="M 20,50 Q 18,40 22,30 Q 18,20 20,10" stroke="#27AE60" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <ellipse cx="22" cy="15" rx="4" ry="6" fill="#2ECC71" opacity="0.7"/>
+    <ellipse cx="18" cy="25" rx="5" ry="7" fill="#2ECC71" opacity="0.7"/>
+    <ellipse cx="22" cy="35" rx="4" ry="6" fill="#2ECC71" opacity="0.7"/>
+    <ellipse cx="18" cy="45" rx="3" ry="5" fill="#2ECC71" opacity="0.7"/>
+    
+    <!-- Middle strand -->
+    <path d="M 30,50 Q 32,38 28,28 Q 32,18 30,8" stroke="#229954" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <ellipse cx="28" cy="13" rx="5" ry="7" fill="#27AE60" opacity="0.7"/>
+    <ellipse cx="32" cy="23" rx="6" ry="8" fill="#27AE60" opacity="0.7"/>
+    <ellipse cx="28" cy="33" rx="5" ry="7" fill="#27AE60" opacity="0.7"/>
+    <ellipse cx="32" cy="43" rx="4" ry="6" fill="#27AE60" opacity="0.7"/>
+    
+    <!-- Right strand -->
+    <path d="M 40,50 Q 38,40 42,30 Q 38,20 40,10" stroke="#27AE60" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <ellipse cx="42" cy="15" rx="4" ry="6" fill="#2ECC71" opacity="0.7"/>
+    <ellipse cx="38" cy="25" rx="5" ry="7" fill="#2ECC71" opacity="0.7"/>
+    <ellipse cx="42" cy="35" rx="4" ry="6" fill="#2ECC71" opacity="0.7"/>
+    <ellipse cx="38" cy="45" rx="3" ry="5" fill="#2ECC71" opacity="0.7"/>
+  </g>
+</svg>

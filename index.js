@@ -5,6 +5,9 @@ const port = process.env.PORT || 3000;
 // Serve static files from the plants directory
 app.use('/plants', express.static('plants'));
 
+// Serve static files from the sandcastle directory
+app.use('/sandcastle', express.static('sandcastle'));
+
 // Serve the flashcard app page
 app.get('/', (req, res) => {
   res.send(`
@@ -544,6 +547,7 @@ app.get('/', (req, res) => {
             max-width: 600px;
             margin: 1.5rem auto;
             padding: 1.5rem;
+            padding-top: 4rem;
             /* Ocean/beach background */
             background: linear-gradient(180deg, #4A90E2 0%, #5BA3E8 50%, #87CEEB 100%);
             border: 8px solid #3B7BB8;
@@ -552,6 +556,7 @@ app.get('/', (req, res) => {
                 inset 0 2px 4px rgba(0, 0, 0, 0.2),
                 0 4px 8px rgba(0, 0, 0, 0.2);
             position: relative;
+            overflow: visible;
         }
         /* Wave pattern effect */
         .sandcastle-grid::before {
@@ -580,6 +585,7 @@ app.get('/', (req, res) => {
             cursor: pointer;
             transition: all 0.3s;
             position: relative;
+            overflow: visible;
         }
         .sandcastle-cell:hover {
             background: rgba(74, 144, 226, 0.5);
@@ -922,18 +928,18 @@ app.get('/', (req, res) => {
         
         // Decoration types for sandcastle
         const DECORATION_TYPES = {
-            'sand_dollar': { name: 'Sand Dollar', emoji: '🪙', isFlag: false },
-            'purple_starfish': { name: 'Purple Starfish', emoji: '⭐', isFlag: false },
-            'green_seaweed': { name: 'Green Seaweed', emoji: '🌿', isFlag: false },
-            'conch_shell': { name: 'Conch Shell', emoji: '🐚', isFlag: false },
-            'red_crab': { name: 'Red Crab', emoji: '🦀', isFlag: false },
-            'clam_shell': { name: 'Clam Shell', emoji: '🦪', isFlag: false },
-            'green_turtle': { name: 'Green Turtle', emoji: '🐢', isFlag: false },
-            'rainbow_flag': { name: 'Rainbow Flag', emoji: '🏳️‍🌈', isFlag: true },
-            'sunshine_flag': { name: 'Sunshine Flag', emoji: '⛱️', isFlag: true },
-            'purple_flag': { name: 'Purple Flag', emoji: '🟣🚩', isFlag: true },
-            'red_flag': { name: 'Red Flag', emoji: '🚩', isFlag: true },
-            'yellow_flag': { name: 'Yellow Flag', emoji: '🟡🚩', isFlag: true }
+            'sand_dollar': { name: 'Sand Dollar', image: 'sandcastle/sand-dollar.svg', isFlag: false },
+            'purple_starfish': { name: 'Purple Starfish', image: 'sandcastle/starfish.svg', isFlag: false },
+            'green_seaweed': { name: 'Green Seaweed', image: 'sandcastle/seaweed.svg', isFlag: false },
+            'conch_shell': { name: 'Conch Shell', image: 'sandcastle/conch-shell.svg', isFlag: false },
+            'red_crab': { name: 'Red Crab', image: 'sandcastle/crab.svg', isFlag: false },
+            'clam_shell': { name: 'Clam Shell', image: 'sandcastle/clam-shell.svg', isFlag: false },
+            'green_turtle': { name: 'Green Turtle', image: 'sandcastle/turtle.svg', isFlag: false },
+            'rainbow_flag': { name: 'Rainbow Flag', image: 'sandcastle/flag-rainbow.svg', isFlag: true },
+            'sunshine_flag': { name: 'Sunshine Flag', image: 'sandcastle/flag-sunshine.svg', isFlag: true },
+            'purple_flag': { name: 'Purple Flag', image: 'sandcastle/flag-purple.svg', isFlag: true },
+            'red_flag': { name: 'Red Flag', image: 'sandcastle/flag-red.svg', isFlag: true },
+            'yellow_flag': { name: 'Yellow Flag', image: 'sandcastle/flag-yellow.svg', isFlag: true }
         };
         
         // Learning criteria constants
@@ -1984,14 +1990,29 @@ app.get('/', (req, res) => {
                     if (decoration) {
                         const decorType = DECORATION_TYPES[decoration];
                         if (decorType) {
-                            const decorSpan = document.createElement('span');
-                            decorSpan.textContent = decorType.emoji;
-                            decorSpan.style.fontSize = '1.5rem';
-                            decorSpan.style.position = 'absolute';
-                            decorSpan.style.top = '50%';
-                            decorSpan.style.left = '50%';
-                            decorSpan.style.transform = 'translate(-50%, -50%)';
-                            cellDiv.appendChild(decorSpan);
+                            const img = document.createElement('img');
+                            img.src = decorType.image;
+                            img.alt = decorType.name;
+                            img.style.position = 'absolute';
+                            
+                            if (decorType.isFlag) {
+                                // Flags are positioned above the sand square
+                                img.style.width = '100%';
+                                img.style.height = 'auto';
+                                img.style.bottom = '100%';
+                                img.style.left = '50%';
+                                img.style.transform = 'translateX(-50%)';
+                                img.style.zIndex = '10';
+                            } else {
+                                // Non-flag decorations are centered on the sand
+                                img.style.width = '80%';
+                                img.style.height = '80%';
+                                img.style.top = '50%';
+                                img.style.left = '50%';
+                                img.style.transform = 'translate(-50%, -50%)';
+                                img.style.objectFit = 'contain';
+                            }
+                            cellDiv.appendChild(img);
                         }
                     }
                     
@@ -2164,14 +2185,17 @@ app.get('/', (req, res) => {
                 
                 const decorDiv = document.createElement('div');
                 decorDiv.className = 'plant-option';
-                const emojiSpan = document.createElement('span');
-                emojiSpan.textContent = decor.emoji;
-                emojiSpan.style.fontSize = '2rem';
-                emojiSpan.style.marginBottom = '0.5rem';
+                const img = document.createElement('img');
+                img.src = decor.image;
+                img.alt = decor.name;
+                img.style.width = '80px';
+                img.style.height = '80px';
+                img.style.objectFit = 'contain';
+                img.style.marginBottom = '0.5rem';
                 const nameDiv = document.createElement('div');
                 nameDiv.style.fontSize = '0.8rem';
                 nameDiv.textContent = decor.name;
-                decorDiv.appendChild(emojiSpan);
+                decorDiv.appendChild(img);
                 decorDiv.appendChild(nameDiv);
                 decorDiv.onclick = () => placeDecoration(decorKey);
                 options.appendChild(decorDiv);

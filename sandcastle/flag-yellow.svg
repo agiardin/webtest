@@ -1,0 +1,14 @@
+<svg width="60" height="80" viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Yellow Flag on Post -->
+  <!-- Flag post -->
+  <rect x="8" y="5" width="3" height="70" fill="#8B4513" stroke="#654321" stroke-width="1"/>
+  <!-- Flag -->
+  <g transform="translate(11, 5)">
+    <!-- Flag background -->
+    <rect x="0" y="0" width="35" height="24" fill="#F1C40F" stroke="#D4AC0D" stroke-width="1"/>
+    <!-- Star decoration -->
+    <path d="M 17.5,5 L 19,10 L 24,10 L 20,13 L 22,18 L 17.5,15 L 13,18 L 15,13 L 11,10 L 16,10 Z" fill="#F39C12" stroke="#D4AC0D" stroke-width="0.5"/>
+    <!-- Wavy edge -->
+    <path d="M 35,0 Q 37,6 35,12 Q 37,18 35,24 L 35,0" fill="#F39C12" stroke="#D4AC0D" stroke-width="0.5"/>
+  </g>
+</svg>

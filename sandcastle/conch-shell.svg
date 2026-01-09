@@ -1,0 +1,20 @@
+<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+  <!-- Conch Shell -->
+  <g transform="translate(30, 30)">
+    <!-- Main shell body -->
+    <ellipse cx="5" cy="0" rx="18" ry="22" fill="#F5CBA7" stroke="#D4A574" stroke-width="2"/>
+    <!-- Spiral chambers -->
+    <ellipse cx="5" cy="-5" rx="12" ry="15" fill="#FAD7A0" stroke="#D4A574" stroke-width="1.5"/>
+    <ellipse cx="5" cy="-8" rx="8" ry="10" fill="#F8E7D0" stroke="#D4A574" stroke-width="1"/>
+    <ellipse cx="5" cy="-10" rx="5" ry="6" fill="#FDEBD0" stroke="#D4A574" stroke-width="0.8"/>
+    <!-- Opening -->
+    <path d="M -10,8 Q -8,12 -5,15 Q 0,18 5,15 L 8,10" fill="#FADBD8" stroke="#D4A574" stroke-width="1.5"/>
+    <!-- Ridges -->
+    <path d="M -8,-10 Q 5,-8 18,0" stroke="#D4A574" stroke-width="1" fill="none" opacity="0.5"/>
+    <path d="M -6,-5 Q 5,-3 18,5" stroke="#D4A574" stroke-width="1" fill="none" opacity="0.5"/>
+    <path d="M -4,0 Q 5,2 18,10" stroke="#D4A574" stroke-width="1" fill="none" opacity="0.5"/>
+    <!-- Spikes -->
+    <path d="M 20,5 L 24,4 L 22,7 Z" fill="#E8DAEF"/>
+    <path d="M 20,-5 L 25,-6 L 21,-3 Z" fill="#E8DAEF"/>
+  </g>
+</svg>
