@@ -663,11 +663,25 @@ app.get('/', (req, res) => {
                 <div class="settings-section">
                     <div class="settings-title">⚙️ Word Selection Settings</div>
                     <div class="setting-item">
+                        <label class="setting-label">Active Reward Activity:</label>
+                        <span class="setting-description">Choose which activity you want to work on. You can only work on one at a time.</span>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                            <label class="checkbox-container" style="flex: 1;">
+                                <input type="radio" name="activeActivity" value="garden" id="gardenRadio" onchange="updateActiveActivity('garden')" style="width: 20px; height: 20px;">
+                                <span>🌱 Garden</span>
+                            </label>
+                            <label class="checkbox-container" style="flex: 1;">
+                                <input type="radio" name="activeActivity" value="sandcastle" id="sandcastleRadio" onchange="updateActiveActivity('sandcastle')" style="width: 20px; height: 20px;">
+                                <span>🏖️ Sandcastle</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="setting-item">
                         <label class="setting-label">Auto-Advance:</label>
-                        <span class="setting-description">Automatically return to the testing page after a delay when you successfully plant or water a plant in the garden.</span>
+                        <span class="setting-description">Automatically return to the testing page after a delay when you successfully complete an activity action.</span>
                         <label class="checkbox-container">
                             <input type="checkbox" id="autoAdvanceCheckbox" onchange="updateAutoAdvance(this.checked)">
-                            <span>Auto-advance from garden to testing</span>
+                            <span>Auto-advance from activity to testing</span>
                         </label>
                     </div>
                     <div class="setting-item">
@@ -849,6 +863,7 @@ app.get('/', (req, res) => {
         let autoAdvanceTimeout = null; // Timeout for auto-advance
         let autoAdvanceDelay = 2000; // Delay in milliseconds before auto-advancing (default 2 seconds)
         let allDoneForToday = false; // Whether all words are done for today (no words due)
+        let activeActivity = 'garden'; // Which activity is currently active: 'garden' or 'sandcastle'
         
         // Developer settings
         let developerUnlocked = false; // Whether developer settings are unlocked
@@ -1210,6 +1225,22 @@ app.get('/', (req, res) => {
         }
         
         function loadSettings() {
+            // Load active activity setting
+            const savedActiveActivity = localStorage.getItem('activeActivity');
+            if (savedActiveActivity !== null) {
+                activeActivity = savedActiveActivity;
+            }
+            // Update the radio buttons if they exist
+            const gardenRadio = document.getElementById('gardenRadio');
+            const sandcastleRadio = document.getElementById('sandcastleRadio');
+            if (gardenRadio && sandcastleRadio) {
+                if (activeActivity === 'garden') {
+                    gardenRadio.checked = true;
+                } else {
+                    sandcastleRadio.checked = true;
+                }
+            }
+            
             // Load auto-advance setting
             const savedAutoAdvance = localStorage.getItem('autoAdvance');
             if (savedAutoAdvance !== null) {
@@ -1250,6 +1281,7 @@ app.get('/', (req, res) => {
         }
         
         function saveSettings() {
+            localStorage.setItem('activeActivity', activeActivity);
             localStorage.setItem('autoAdvance', autoAdvance.toString());
             localStorage.setItem('autoAdvanceDelay', autoAdvanceDelay.toString());
             localStorage.setItem('bucketDelays', JSON.stringify(bucketDelays));
@@ -1277,6 +1309,11 @@ app.get('/', (req, res) => {
                 return;
             }
             autoAdvanceDelay = Math.round(seconds * 1000); // Convert seconds to milliseconds
+            saveSettings();
+        }
+        
+        function updateActiveActivity(activity) {
+            activeActivity = activity;
             saveSettings();
         }
         
@@ -1748,16 +1785,15 @@ app.get('/', (req, res) => {
                 saveWords();
                 showNextWord(); // Select next word before showing reward page
                 
-                // Alternate between garden and sandcastle rewards
-                // Use times seen to determine which reward to show
-                if (currentWordObj.timesSeen % 2 === 0) {
-                    sandcastleActionAllowed = true;
-                    gardenActionAllowed = false;
-                    showPage('sandcastle');
-                } else {
+                // Show the active activity based on user setting
+                if (activeActivity === 'garden') {
                     gardenActionAllowed = true;
                     sandcastleActionAllowed = false;
                     showPage('dopamine');
+                } else {
+                    sandcastleActionAllowed = true;
+                    gardenActionAllowed = false;
+                    showPage('sandcastle');
                 }
             } else if (result === 'fail') {
                 // Increment times seen
@@ -1962,8 +1998,23 @@ app.get('/', (req, res) => {
                 return row === SANDCASTLE_ROWS - 1; // Bottom row
             }
             
-            // Otherwise, must be adjacent to existing sand
-            return isAdjacentToSand(index);
+            // Otherwise, must be adjacent to existing sand AND have sand underneath
+            // Check if adjacent to existing sand
+            if (!isAdjacentToSand(index)) {
+                return false;
+            }
+            
+            // Check if there's sand underneath (support requirement)
+            const row = Math.floor(index / SANDCASTLE_COLS);
+            
+            // If on bottom row, it has ground support
+            if (row === SANDCASTLE_ROWS - 1) {
+                return true;
+            }
+            
+            // Otherwise, check if there's sand directly below
+            const belowIndex = index + SANDCASTLE_COLS;
+            return sandcastle[belowIndex];
         }
         
         function isAdjacentToSand(index) {
