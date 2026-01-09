@@ -2,11 +2,20 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Configure Express to serve SVG files with correct MIME type
+express.static.mime.define({'image/svg+xml': ['svg']});
+
 // Serve static files from the plants directory
 app.use('/plants', express.static('plants'));
 
 // Serve static files from the sandcastle directory
-app.use('/sandcastle', express.static('sandcastle'));
+app.use('/sandcastle', express.static('sandcastle', {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.svg')) {
+      res.setHeader('Content-Type', 'image/svg+xml');
+    }
+  }
+}));
 
 // Serve the flashcard app page
 app.get('/', (req, res) => {
