@@ -2182,7 +2182,7 @@ app.get('/', (req, res) => {
         }
         
         function placeDecoration(decorationType) {
-            if (selectedCellIndex !== null && sandcastle[selectedCellIndex]) {
+            if (selectedCellIndex !== null && sandcastle[selectedCellIndex] && sandcastle[selectedCellIndex].hasSand) {
                 sandcastle[selectedCellIndex].decoration = decorationType;
                 sandcastleActionAllowed = false; // Disable further actions after placing decoration
                 saveWordLists();
