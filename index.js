@@ -531,6 +531,96 @@ app.get('/', (req, res) => {
             height: 20px;
             cursor: pointer;
         }
+        
+        /* Sandcastle Page Styles */
+        .sandcastle-container {
+            text-align: center;
+        }
+        /* Grid layout: 10 columns × 10 rows (100 cells) */
+        .sandcastle-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 0.25rem;
+            max-width: 600px;
+            margin: 1.5rem auto;
+            padding: 1.5rem;
+            /* Ocean/beach background */
+            background: linear-gradient(180deg, #4A90E2 0%, #5BA3E8 50%, #87CEEB 100%);
+            border: 8px solid #3B7BB8;
+            border-radius: 8px;
+            box-shadow: 
+                inset 0 2px 4px rgba(0, 0, 0, 0.2),
+                0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        /* Wave pattern effect */
+        .sandcastle-grid::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent 0px,
+                transparent 20px,
+                rgba(255, 255, 255, 0.1) 20px,
+                rgba(255, 255, 255, 0.1) 22px
+            );
+            border-radius: 8px;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .sandcastle-cell {
+            aspect-ratio: 1;
+            background: rgba(74, 144, 226, 0.3);
+            border: 2px solid rgba(59, 123, 184, 0.5);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .sandcastle-cell:hover {
+            background: rgba(74, 144, 226, 0.5);
+            border-color: #3B7BB8;
+            transform: scale(1.05);
+        }
+        .sandcastle-cell.sand {
+            background: linear-gradient(135deg, #F4E4C1 0%, #EDD9A3 50%, #E6CE85 100%);
+            border-color: #D4B483;
+            cursor: default;
+        }
+        .sandcastle-cell.sand:hover {
+            transform: none;
+        }
+        .sandcastle-cell.available {
+            background: rgba(244, 228, 193, 0.3);
+            border: 2px dashed #D4B483;
+            cursor: pointer;
+        }
+        .sandcastle-cell.available:hover {
+            background: rgba(244, 228, 193, 0.5);
+            transform: scale(1.05);
+        }
+        .sandcastle-info {
+            margin-top: 1rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .sandcastle-info.completion-banner {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            animation: slideIn 0.5s ease-out;
+        }
     </style>
 </head>
 <body>
@@ -540,6 +630,7 @@ app.get('/', (req, res) => {
             <button class="nav-btn active" onclick="showPage('wordlist', event)">⚙️ Settings</button>
             <button class="nav-btn" onclick="showPage('progress', event)">📊 Progress</button>
             <button class="nav-btn" onclick="showPage('dopamine', event)">🌱 Garden</button>
+            <button class="nav-btn" onclick="showPage('sandcastle', event)">🏖️ Sandcastle</button>
         </nav>
         
         <div class="container">
@@ -632,6 +723,7 @@ app.get('/', (req, res) => {
                         <div class="button-group">
                             <button onclick="resetWordStatistics()">Reset Word Statistics</button>
                             <button onclick="resetGarden()">Reset Garden</button>
+                            <button onclick="resetSandcastle()">Reset Sandcastle</button>
                         </div>
                     </div>
                 </div>
@@ -724,6 +816,16 @@ app.get('/', (req, res) => {
                     <button class="continue-btn" onclick="continueTesting()">Continue Testing</button>
                 </div>
             </div>
+            
+            <!-- Sandcastle Page -->
+            <div id="sandcastlePage" class="page">
+                <h1>🏖️ Your Sandcastle</h1>
+                <div class="sandcastle-container">
+                    <p class="sandcastle-info">✨ Great job! Build your sandcastle by clicking on squares adjacent to existing sand!</p>
+                    <div class="sandcastle-grid" id="sandcastleGrid"></div>
+                    <button class="continue-btn" onclick="continueTesting()">Continue Testing</button>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -739,8 +841,10 @@ app.get('/', (req, res) => {
         let currentWordObj = null;
         let currentPage = 'wordlist';
         let garden = [];
+        let sandcastle = []; // Array of 100 cells for 10x10 grid
         let selectedCellIndex = null;
         let gardenActionAllowed = false; // Whether a garden action is allowed for the current correct answer
+        let sandcastleActionAllowed = false; // Whether a sandcastle action is allowed for the current correct answer
         let autoAdvance = true; // Whether to auto-advance from garden to testing after configurable delay
         let autoAdvanceTimeout = null; // Timeout for auto-advance
         let autoAdvanceDelay = 2000; // Delay in milliseconds before auto-advancing (default 2 seconds)
@@ -795,6 +899,11 @@ app.get('/', (req, res) => {
         const GRID_COLS = 4;
         const GRID_ROWS = 6;
         const GRID_TOTAL_CELLS = GRID_COLS * GRID_ROWS;
+        
+        // Sandcastle grid dimensions
+        const SANDCASTLE_COLS = 10;
+        const SANDCASTLE_ROWS = 10;
+        const SANDCASTLE_TOTAL_CELLS = SANDCASTLE_COLS * SANDCASTLE_ROWS;
         
         // Learning criteria constants
         const MIN_ATTEMPTS_FOR_LEARNED = 3;
@@ -856,7 +965,7 @@ app.get('/', (req, res) => {
             } else {
                 // Fallback: find and activate the correct button based on pageName
                 const buttons = document.querySelectorAll('.nav-btn');
-                const buttonTexts = ['testing', 'wordlist', 'progress', 'dopamine'];
+                const buttonTexts = ['testing', 'wordlist', 'progress', 'dopamine', 'sandcastle'];
                 const index = buttonTexts.indexOf(pageName);
                 if (index !== -1 && buttons[index]) {
                     buttons[index].classList.add('active');
@@ -874,6 +983,8 @@ app.get('/', (req, res) => {
                 updateProgressView();
             } else if (pageName === 'dopamine') {
                 updateGardenView();
+            } else if (pageName === 'sandcastle') {
+                updateSandcastleView();
             }
         }
 
@@ -909,7 +1020,8 @@ app.get('/', (req, res) => {
                         id: 'list_' + Date.now(),
                         name: 'My Word List',
                         words: oldWords ? JSON.parse(oldWords).map(word => migrateWord(word)) : [],
-                        garden: oldGarden ? JSON.parse(oldGarden) : Array(GRID_TOTAL_CELLS).fill(null)
+                        garden: oldGarden ? JSON.parse(oldGarden) : Array(GRID_TOTAL_CELLS).fill(null),
+                        sandcastle: Array(SANDCASTLE_TOTAL_CELLS).fill(false)
                     };
                     wordLists = [defaultList];
                     currentListId = defaultList.id;
@@ -925,7 +1037,8 @@ app.get('/', (req, res) => {
                         id: 'list_' + Date.now(),
                         name: 'My Word List',
                         words: [],
-                        garden: Array(GRID_TOTAL_CELLS).fill(null)
+                        garden: Array(GRID_TOTAL_CELLS).fill(null),
+                        sandcastle: Array(SANDCASTLE_TOTAL_CELLS).fill(false)
                     };
                     wordLists = [defaultList];
                     currentListId = defaultList.id;
@@ -968,6 +1081,7 @@ app.get('/', (req, res) => {
             if (currentList) {
                 words = currentList.words;
                 garden = currentList.garden || [];
+                sandcastle = currentList.sandcastle || [];
                 
                 // Ensure garden is properly initialized
                 if (garden.length !== GRID_TOTAL_CELLS) {
@@ -979,9 +1093,21 @@ app.get('/', (req, res) => {
                         }
                     }
                 }
+                
+                // Ensure sandcastle is properly initialized
+                if (sandcastle.length !== SANDCASTLE_TOTAL_CELLS) {
+                    sandcastle = Array(SANDCASTLE_TOTAL_CELLS).fill(false);
+                    // Copy any existing sand
+                    if (currentList.sandcastle) {
+                        for (let i = 0; i < Math.min(currentList.sandcastle.length, SANDCASTLE_TOTAL_CELLS); i++) {
+                            sandcastle[i] = currentList.sandcastle[i];
+                        }
+                    }
+                }
             } else {
                 words = [];
                 garden = Array(GRID_TOTAL_CELLS).fill(null);
+                sandcastle = Array(SANDCASTLE_TOTAL_CELLS).fill(false);
             }
         }
         
@@ -991,6 +1117,7 @@ app.get('/', (req, res) => {
             if (currentList) {
                 currentList.words = words;
                 currentList.garden = garden;
+                currentList.sandcastle = sandcastle;
             }
             
             localStorage.setItem('wordLists', JSON.stringify(wordLists));
@@ -1038,7 +1165,8 @@ app.get('/', (req, res) => {
                 id: 'list_' + Date.now(),
                 name: listName.trim(),
                 words: [],
-                garden: Array(GRID_TOTAL_CELLS).fill(null)
+                garden: Array(GRID_TOTAL_CELLS).fill(null),
+                sandcastle: Array(SANDCASTLE_TOTAL_CELLS).fill(false)
             };
             
             wordLists.push(newList);
@@ -1421,6 +1549,7 @@ app.get('/', (req, res) => {
                 autoAdvanceTimeout = null;
             }
             gardenActionAllowed = false; // Reset for next time
+            sandcastleActionAllowed = false; // Reset for next time
             showPage('testing');
         }
         
@@ -1617,10 +1746,19 @@ app.get('/', (req, res) => {
                 }
                 
                 saveWords();
-                showNextWord(); // Select next word before showing garden
-                gardenActionAllowed = true; // Allow one garden action for correct answer
-                // Show dopamine page on correct answer
-                showPage('dopamine');
+                showNextWord(); // Select next word before showing reward page
+                
+                // Alternate between garden and sandcastle rewards
+                // Use times seen to determine which reward to show
+                if (currentWordObj.timesSeen % 2 === 0) {
+                    sandcastleActionAllowed = true;
+                    gardenActionAllowed = false;
+                    showPage('sandcastle');
+                } else {
+                    gardenActionAllowed = true;
+                    sandcastleActionAllowed = false;
+                    showPage('dopamine');
+                }
             } else if (result === 'fail') {
                 // Increment times seen
                 currentWordObj.timesSeen++;
@@ -1752,6 +1890,137 @@ app.get('/', (req, res) => {
             updateWordListView();
             updateProgressView();
             updateGardenView();
+            updateSandcastleView();
+        }
+        
+        // Sandcastle Management
+        function updateSandcastleView() {
+            const grid = document.getElementById('sandcastleGrid');
+            if (!grid) return;
+            
+            grid.innerHTML = '';
+            
+            sandcastle.forEach((hasSand, index) => {
+                const cellDiv = document.createElement('div');
+                cellDiv.className = 'sandcastle-cell';
+                
+                if (hasSand) {
+                    cellDiv.classList.add('sand');
+                } else if (canPlaceSand(index)) {
+                    cellDiv.classList.add('available');
+                    if (sandcastleActionAllowed) {
+                        cellDiv.onclick = () => placeSand(index);
+                    }
+                }
+                
+                // Disable interaction if no action is allowed
+                if (!sandcastleActionAllowed && !hasSand) {
+                    cellDiv.style.cursor = 'not-allowed';
+                    cellDiv.onclick = null;
+                }
+                
+                grid.appendChild(cellDiv);
+            });
+            
+            // Update info message based on whether action is allowed
+            const sandcastleInfo = document.querySelector('.sandcastle-info');
+            if (sandcastleInfo) {
+                if (allDoneForToday) {
+                    sandcastleInfo.textContent = '🎉 All done for today! Great work! Come back tomorrow for more practice. 🌟';
+                    sandcastleInfo.classList.add('completion-banner');
+                } else {
+                    sandcastleInfo.classList.remove('completion-banner');
+                    if (sandcastleActionAllowed) {
+                        const sandCount = sandcastle.filter(s => s).length;
+                        if (sandCount === 0) {
+                            sandcastleInfo.textContent = '✨ Great job! Click any square on the bottom row to start building your sandcastle!';
+                        } else {
+                            sandcastleInfo.textContent = '✨ Great job! Click an available square (dashed border) adjacent to existing sand!';
+                        }
+                    } else {
+                        sandcastleInfo.textContent = '✅ Sandcastle action completed! Click "Continue Testing" to answer more questions.';
+                    }
+                }
+            }
+            
+            // Update Continue Testing button visibility
+            const continueBtn = document.querySelector('.sandcastle-container .continue-btn');
+            if (continueBtn) {
+                if (allDoneForToday) {
+                    continueBtn.style.display = 'none';
+                } else {
+                    continueBtn.style.display = 'block';
+                }
+            }
+        }
+        
+        function canPlaceSand(index) {
+            // If sandcastle is completely empty, can only place on bottom row
+            const hasSand = sandcastle.some(s => s);
+            if (!hasSand) {
+                const row = Math.floor(index / SANDCASTLE_COLS);
+                return row === SANDCASTLE_ROWS - 1; // Bottom row
+            }
+            
+            // Otherwise, must be adjacent to existing sand
+            return isAdjacentToSand(index);
+        }
+        
+        function isAdjacentToSand(index) {
+            const row = Math.floor(index / SANDCASTLE_COLS);
+            const col = index % SANDCASTLE_COLS;
+            
+            // Check all four adjacent cells (up, down, left, right)
+            const adjacentIndices = [];
+            
+            // Up
+            if (row > 0) {
+                adjacentIndices.push(index - SANDCASTLE_COLS);
+            }
+            // Down
+            if (row < SANDCASTLE_ROWS - 1) {
+                adjacentIndices.push(index + SANDCASTLE_COLS);
+            }
+            // Left
+            if (col > 0) {
+                adjacentIndices.push(index - 1);
+            }
+            // Right
+            if (col < SANDCASTLE_COLS - 1) {
+                adjacentIndices.push(index + 1);
+            }
+            
+            // Check if any adjacent cell has sand
+            return adjacentIndices.some(i => sandcastle[i]);
+        }
+        
+        function placeSand(index) {
+            if (!sandcastleActionAllowed) {
+                return; // Don't allow action if already performed
+            }
+            
+            if (!canPlaceSand(index)) {
+                return; // Invalid placement
+            }
+            
+            sandcastle[index] = true;
+            sandcastleActionAllowed = false; // Disable further actions after placing sand
+            saveWordLists();
+            updateSandcastleView();
+            
+            // Start auto-advance timer if enabled
+            if (autoAdvance) {
+                startAutoAdvanceTimer();
+            }
+        }
+        
+        function resetSandcastle() {
+            if (confirm('Are you sure you want to reset your sandcastle? This will remove all sand and cannot be undone!')) {
+                sandcastle = Array(SANDCASTLE_TOTAL_CELLS).fill(false);
+                saveWordLists();
+                updateSandcastleView();
+                alert('Sandcastle has been reset successfully!');
+            }
         }
         
         // Reset Functions
