@@ -667,11 +667,11 @@ app.get('/', (req, res) => {
                         <span class="setting-description">Choose which activity you want to work on. You can only work on one at a time.</span>
                         <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
                             <label class="checkbox-container" style="flex: 1;">
-                                <input type="radio" name="activeActivity" value="garden" id="gardenRadio" onchange="updateActiveActivity('garden')" style="width: 20px; height: 20px;">
+                                <input type="radio" name="activeActivity" value="garden" id="gardenRadio" onchange="updateActiveActivity('garden')" style="width: 20px; height: 20px;" aria-label="Garden activity">
                                 <span>🌱 Garden</span>
                             </label>
                             <label class="checkbox-container" style="flex: 1;">
-                                <input type="radio" name="activeActivity" value="sandcastle" id="sandcastleRadio" onchange="updateActiveActivity('sandcastle')" style="width: 20px; height: 20px;">
+                                <input type="radio" name="activeActivity" value="sandcastle" id="sandcastleRadio" onchange="updateActiveActivity('sandcastle')" style="width: 20px; height: 20px;" aria-label="Sandcastle activity">
                                 <span>🏖️ Sandcastle</span>
                             </label>
                         </div>
@@ -1236,7 +1236,7 @@ app.get('/', (req, res) => {
             if (gardenRadio && sandcastleRadio) {
                 if (activeActivity === 'garden') {
                     gardenRadio.checked = true;
-                } else {
+                } else if (activeActivity === 'sandcastle') {
                     sandcastleRadio.checked = true;
                 }
             }
@@ -1790,7 +1790,7 @@ app.get('/', (req, res) => {
                     gardenActionAllowed = true;
                     sandcastleActionAllowed = false;
                     showPage('dopamine');
-                } else {
+                } else if (activeActivity === 'sandcastle') {
                     sandcastleActionAllowed = true;
                     gardenActionAllowed = false;
                     showPage('sandcastle');
