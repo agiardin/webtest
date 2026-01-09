@@ -1,0 +1,18 @@
+<svg width="60" height="80" viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Purple Flag on Post -->
+  <!-- Flag post -->
+  <rect x="8" y="5" width="3" height="70" fill="#8B4513" stroke="#654321" stroke-width="1"/>
+  <!-- Flag -->
+  <g transform="translate(11, 5)">
+    <!-- Flag background -->
+    <rect x="0" y="0" width="35" height="24" fill="#9B59B6" stroke="#7D3C98" stroke-width="1"/>
+    <!-- Pattern decoration -->
+    <circle cx="10" cy="8" r="2" fill="#BB8FCE" opacity="0.6"/>
+    <circle cx="17.5" cy="12" r="3" fill="#BB8FCE" opacity="0.6"/>
+    <circle cx="25" cy="8" r="2" fill="#BB8FCE" opacity="0.6"/>
+    <circle cx="10" cy="16" r="2" fill="#BB8FCE" opacity="0.6"/>
+    <circle cx="25" cy="16" r="2" fill="#BB8FCE" opacity="0.6"/>
+    <!-- Wavy edge -->
+    <path d="M 35,0 Q 37,6 35,12 Q 37,18 35,24 L 35,0" fill="#8E44AD" stroke="#7D3C98" stroke-width="0.5"/>
+  </g>
+</svg>

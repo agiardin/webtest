@@ -1,0 +1,18 @@
+<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sand Dollar -->
+  <circle cx="30" cy="30" r="25" fill="#E8D5B7" stroke="#C4A572" stroke-width="2"/>
+  <!-- Star pattern -->
+  <path d="M30 15 L32 25 L30 35 L28 25 Z" fill="#C4A572"/>
+  <path d="M15 30 L25 32 L35 30 L25 28 Z" fill="#C4A572"/>
+  <path d="M21 21 L28 28 L35 35" stroke="#C4A572" stroke-width="1.5" fill="none"/>
+  <path d="M39 21 L32 28 L25 35" stroke="#C4A572" stroke-width="1.5" fill="none"/>
+  <!-- Small dots around edge -->
+  <circle cx="30" cy="8" r="1.5" fill="#C4A572"/>
+  <circle cx="30" cy="52" r="1.5" fill="#C4A572"/>
+  <circle cx="8" cy="30" r="1.5" fill="#C4A572"/>
+  <circle cx="52" cy="30" r="1.5" fill="#C4A572"/>
+  <circle cx="15" cy="15" r="1.5" fill="#C4A572"/>
+  <circle cx="45" cy="15" r="1.5" fill="#C4A572"/>
+  <circle cx="15" cy="45" r="1.5" fill="#C4A572"/>
+  <circle cx="45" cy="45" r="1.5" fill="#C4A572"/>
+</svg>

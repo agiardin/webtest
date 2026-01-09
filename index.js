@@ -5,6 +5,15 @@ const port = process.env.PORT || 3000;
 // Serve static files from the plants directory
 app.use('/plants', express.static('plants'));
 
+// Serve static files from the sandcastle directory with correct SVG MIME type
+app.use('/sandcastle', express.static('sandcastle', {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.svg')) {
+      res.setHeader('Content-Type', 'image/svg+xml');
+    }
+  }
+}));
+
 // Serve the flashcard app page
 app.get('/', (req, res) => {
   res.send(`
@@ -544,6 +553,7 @@ app.get('/', (req, res) => {
             max-width: 600px;
             margin: 1.5rem auto;
             padding: 1.5rem;
+            padding-top: 4rem;
             /* Ocean/beach background */
             background: linear-gradient(180deg, #4A90E2 0%, #5BA3E8 50%, #87CEEB 100%);
             border: 8px solid #3B7BB8;
@@ -552,6 +562,7 @@ app.get('/', (req, res) => {
                 inset 0 2px 4px rgba(0, 0, 0, 0.2),
                 0 4px 8px rgba(0, 0, 0, 0.2);
             position: relative;
+            overflow: visible;
         }
         /* Wave pattern effect */
         .sandcastle-grid::before {
@@ -580,6 +591,7 @@ app.get('/', (req, res) => {
             cursor: pointer;
             transition: all 0.3s;
             position: relative;
+            overflow: visible;
         }
         .sandcastle-cell:hover {
             background: rgba(74, 144, 226, 0.5);
@@ -920,6 +932,22 @@ app.get('/', (req, res) => {
         const SANDCASTLE_ROWS = 10;
         const SANDCASTLE_TOTAL_CELLS = SANDCASTLE_COLS * SANDCASTLE_ROWS;
         
+        // Decoration types for sandcastle
+        const DECORATION_TYPES = {
+            'sand_dollar': { name: 'Sand Dollar', image: 'sandcastle/sand-dollar.svg', isFlag: false },
+            'purple_starfish': { name: 'Purple Starfish', image: 'sandcastle/starfish.svg', isFlag: false },
+            'green_seaweed': { name: 'Green Seaweed', image: 'sandcastle/seaweed.svg', isFlag: false },
+            'conch_shell': { name: 'Conch Shell', image: 'sandcastle/conch-shell.svg', isFlag: false },
+            'red_crab': { name: 'Red Crab', image: 'sandcastle/crab.svg', isFlag: false },
+            'clam_shell': { name: 'Clam Shell', image: 'sandcastle/clam-shell.svg', isFlag: false },
+            'green_turtle': { name: 'Green Turtle', image: 'sandcastle/turtle.svg', isFlag: false },
+            'rainbow_flag': { name: 'Rainbow Flag', image: 'sandcastle/flag-rainbow.svg', isFlag: true },
+            'sunshine_flag': { name: 'Sunshine Flag', image: 'sandcastle/flag-sunshine.svg', isFlag: true },
+            'purple_flag': { name: 'Purple Flag', image: 'sandcastle/flag-purple.svg', isFlag: true },
+            'red_flag': { name: 'Red Flag', image: 'sandcastle/flag-red.svg', isFlag: true },
+            'yellow_flag': { name: 'Yellow Flag', image: 'sandcastle/flag-yellow.svg', isFlag: true }
+        };
+        
         // Learning criteria constants
         const MIN_ATTEMPTS_FOR_LEARNED = 3;
         const MIN_ACCURACY_FOR_LEARNED = 0.8;
@@ -1036,7 +1064,7 @@ app.get('/', (req, res) => {
                         name: 'My Word List',
                         words: oldWords ? JSON.parse(oldWords).map(word => migrateWord(word)) : [],
                         garden: oldGarden ? JSON.parse(oldGarden) : Array(GRID_TOTAL_CELLS).fill(null),
-                        sandcastle: Array(SANDCASTLE_TOTAL_CELLS).fill(false)
+                        sandcastle: Array(SANDCASTLE_TOTAL_CELLS).fill(null)
                     };
                     wordLists = [defaultList];
                     currentListId = defaultList.id;
@@ -1053,7 +1081,7 @@ app.get('/', (req, res) => {
                         name: 'My Word List',
                         words: [],
                         garden: Array(GRID_TOTAL_CELLS).fill(null),
-                        sandcastle: Array(SANDCASTLE_TOTAL_CELLS).fill(false)
+                        sandcastle: Array(SANDCASTLE_TOTAL_CELLS).fill(null)
                     };
                     wordLists = [defaultList];
                     currentListId = defaultList.id;
@@ -1109,20 +1137,38 @@ app.get('/', (req, res) => {
                     }
                 }
                 
-                // Ensure sandcastle is properly initialized
+                // Ensure sandcastle is properly initialized and migrate old boolean format
                 if (sandcastle.length !== SANDCASTLE_TOTAL_CELLS) {
-                    sandcastle = Array(SANDCASTLE_TOTAL_CELLS).fill(false);
+                    sandcastle = Array(SANDCASTLE_TOTAL_CELLS).fill(null);
                     // Copy any existing sand
                     if (currentList.sandcastle) {
                         for (let i = 0; i < Math.min(currentList.sandcastle.length, SANDCASTLE_TOTAL_CELLS); i++) {
-                            sandcastle[i] = currentList.sandcastle[i];
+                            const cell = currentList.sandcastle[i];
+                            // Migrate old boolean format to new object format
+                            if (cell === true) {
+                                sandcastle[i] = { hasSand: true, decoration: null };
+                            } else if (cell === false || cell === null) {
+                                sandcastle[i] = null;
+                            } else {
+                                sandcastle[i] = cell;
+                            }
+                        }
+                    }
+                } else {
+                    // Migrate existing data if needed
+                    for (let i = 0; i < sandcastle.length; i++) {
+                        const cell = sandcastle[i];
+                        if (cell === true) {
+                            sandcastle[i] = { hasSand: true, decoration: null };
+                        } else if (cell === false) {
+                            sandcastle[i] = null;
                         }
                     }
                 }
             } else {
                 words = [];
                 garden = Array(GRID_TOTAL_CELLS).fill(null);
-                sandcastle = Array(SANDCASTLE_TOTAL_CELLS).fill(false);
+                sandcastle = Array(SANDCASTLE_TOTAL_CELLS).fill(null);
             }
         }
         
@@ -1181,7 +1227,7 @@ app.get('/', (req, res) => {
                 name: listName.trim(),
                 words: [],
                 garden: Array(GRID_TOTAL_CELLS).fill(null),
-                sandcastle: Array(SANDCASTLE_TOTAL_CELLS).fill(false)
+                sandcastle: Array(SANDCASTLE_TOTAL_CELLS).fill(null)
             };
             
             wordLists.push(newList);
@@ -1936,16 +1982,55 @@ app.get('/', (req, res) => {
             
             grid.innerHTML = '';
             
-            sandcastle.forEach((hasSand, index) => {
+            sandcastle.forEach((cell, index) => {
                 const cellDiv = document.createElement('div');
                 cellDiv.className = 'sandcastle-cell';
                 
+                const hasSand = cell && cell.hasSand;
+                const decoration = cell ? cell.decoration : null;
+                
                 if (hasSand) {
                     cellDiv.classList.add('sand');
+                    
+                    // Display decoration if present
+                    if (decoration) {
+                        const decorType = DECORATION_TYPES[decoration];
+                        if (decorType) {
+                            const img = document.createElement('img');
+                            img.src = decorType.image;
+                            img.alt = decorType.name;
+                            img.style.position = 'absolute';
+                            
+                            if (decorType.isFlag) {
+                                // Flags are positioned above the sand square
+                                img.style.width = '100%';
+                                img.style.height = 'auto';
+                                img.style.bottom = '100%';
+                                img.style.left = '50%';
+                                img.style.transform = 'translateX(-50%)';
+                                img.style.zIndex = '10';
+                            } else {
+                                // Non-flag decorations are centered on the sand
+                                img.style.width = '80%';
+                                img.style.height = '80%';
+                                img.style.top = '50%';
+                                img.style.left = '50%';
+                                img.style.transform = 'translate(-50%, -50%)';
+                                img.style.objectFit = 'contain';
+                            }
+                            cellDiv.appendChild(img);
+                        }
+                    }
+                    
+                    // Allow placing decoration on sand if action is allowed
+                    if (sandcastleActionAllowed && !decoration) {
+                        cellDiv.style.cursor = 'pointer';
+                        cellDiv.onclick = () => selectDecoration(index);
+                    }
                 } else if (canPlaceSand(index)) {
                     cellDiv.classList.add('available');
                     if (sandcastleActionAllowed) {
-                        cellDiv.onclick = () => placeSand(index);
+                        cellDiv.onclick = () => showSandOrDecorationChoice(index);
                     }
                 }
                 
@@ -1967,11 +2052,11 @@ app.get('/', (req, res) => {
                 } else {
                     sandcastleInfo.classList.remove('completion-banner');
                     if (sandcastleActionAllowed) {
-                        const sandCount = sandcastle.filter(s => s).length;
+                        const sandCount = sandcastle.filter(s => s && s.hasSand).length;
                         if (sandCount === 0) {
                             sandcastleInfo.textContent = '✨ Great job! Click any square on the bottom row to start building your sandcastle!';
                         } else {
-                            sandcastleInfo.textContent = '✨ Great job! Click an available square (dashed border) adjacent to existing sand!';
+                            sandcastleInfo.textContent = '✨ Great job! Click a square to place sand or add decorations to existing sand!';
                         }
                     } else {
                         sandcastleInfo.textContent = '✅ Sandcastle action completed! Click "Continue Testing" to answer more questions.';
@@ -1992,7 +2077,7 @@ app.get('/', (req, res) => {
         
         function canPlaceSand(index) {
             // If sandcastle is completely empty, can only place on bottom row
-            const hasSand = sandcastle.some(s => s);
+            const hasSand = sandcastle.some(s => s && s.hasSand);
             if (!hasSand) {
                 const row = Math.floor(index / SANDCASTLE_COLS);
                 return row === SANDCASTLE_ROWS - 1; // Bottom row
@@ -2014,7 +2099,7 @@ app.get('/', (req, res) => {
             
             // Otherwise, check if there's sand directly below
             const belowIndex = index + SANDCASTLE_COLS;
-            return sandcastle[belowIndex];
+            return sandcastle[belowIndex] && sandcastle[belowIndex].hasSand;
         }
         
         function isAdjacentToSand(index) {
@@ -2042,7 +2127,18 @@ app.get('/', (req, res) => {
             }
             
             // Check if any adjacent cell has sand
-            return adjacentIndices.some(i => sandcastle[i]);
+            return adjacentIndices.some(i => sandcastle[i] && sandcastle[i].hasSand);
+        }
+        
+        function showSandOrDecorationChoice(index) {
+            if (!sandcastleActionAllowed) {
+                return;
+            }
+            
+            // If placing on an available spot, always place sand
+            if (canPlaceSand(index)) {
+                placeSand(index);
+            }
         }
         
         function placeSand(index) {
@@ -2054,7 +2150,7 @@ app.get('/', (req, res) => {
                 return; // Invalid placement
             }
             
-            sandcastle[index] = true;
+            sandcastle[index] = { hasSand: true, decoration: null };
             sandcastleActionAllowed = false; // Disable further actions after placing sand
             saveWordLists();
             updateSandcastleView();
@@ -2065,9 +2161,74 @@ app.get('/', (req, res) => {
             }
         }
         
+        function selectDecoration(index) {
+            if (!sandcastleActionAllowed) {
+                return;
+            }
+            
+            selectedCellIndex = index;
+            
+            // Show decoration selector
+            const overlay = document.getElementById('plantSelectorOverlay');
+            const selector = document.getElementById('plantSelector');
+            const options = document.getElementById('plantOptions');
+            const title = selector.querySelector('h2');
+            
+            title.textContent = 'Choose a Decoration';
+            options.innerHTML = '';
+            
+            // Check if this cell has sand on top (for flag restriction)
+            const row = Math.floor(index / SANDCASTLE_COLS);
+            const hasSandOnTop = row > 0 && sandcastle[index - SANDCASTLE_COLS] && sandcastle[index - SANDCASTLE_COLS].hasSand;
+            
+            Object.keys(DECORATION_TYPES).forEach(decorKey => {
+                const decor = DECORATION_TYPES[decorKey];
+                
+                // Skip flags if there's sand on top
+                if (decor.isFlag && hasSandOnTop) {
+                    return;
+                }
+                
+                const decorDiv = document.createElement('div');
+                decorDiv.className = 'plant-option';
+                const img = document.createElement('img');
+                img.src = decor.image;
+                img.alt = decor.name;
+                img.style.width = '80px';
+                img.style.height = '80px';
+                img.style.objectFit = 'contain';
+                img.style.marginBottom = '0.5rem';
+                const nameDiv = document.createElement('div');
+                nameDiv.style.fontSize = '0.8rem';
+                nameDiv.textContent = decor.name;
+                decorDiv.appendChild(img);
+                decorDiv.appendChild(nameDiv);
+                decorDiv.onclick = () => placeDecoration(decorKey);
+                options.appendChild(decorDiv);
+            });
+            
+            overlay.classList.add('active');
+            selector.classList.add('active');
+        }
+        
+        function placeDecoration(decorationType) {
+            if (selectedCellIndex !== null && sandcastle[selectedCellIndex] && sandcastle[selectedCellIndex].hasSand) {
+                sandcastle[selectedCellIndex].decoration = decorationType;
+                sandcastleActionAllowed = false; // Disable further actions after placing decoration
+                saveWordLists();
+                updateSandcastleView();
+                closePlantSelector();
+                
+                // Start auto-advance timer if enabled
+                if (autoAdvance) {
+                    startAutoAdvanceTimer();
+                }
+            }
+        }
+        
         function resetSandcastle() {
             if (confirm('Are you sure you want to reset your sandcastle? This will remove all sand and cannot be undone!')) {
-                sandcastle = Array(SANDCASTLE_TOTAL_CELLS).fill(false);
+                sandcastle = Array(SANDCASTLE_TOTAL_CELLS).fill(null);
                 saveWordLists();
                 updateSandcastleView();
                 alert('Sandcastle has been reset successfully!');

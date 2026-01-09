@@ -1,0 +1,25 @@
+<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+  <!-- Green Sea Turtle -->
+  <g transform="translate(30, 30)">
+    <!-- Shell -->
+    <ellipse cx="0" cy="0" rx="16" ry="13" fill="#27AE60" stroke="#1E8449" stroke-width="2"/>
+    <!-- Shell pattern -->
+    <ellipse cx="0" cy="-6" rx="6" ry="5" fill="#229954" stroke="#1E8449" stroke-width="1"/>
+    <ellipse cx="-7" cy="0" rx="5" ry="6" fill="#229954" stroke="#1E8449" stroke-width="1"/>
+    <ellipse cx="7" cy="0" rx="5" ry="6" fill="#229954" stroke="#1E8449" stroke-width="1"/>
+    <ellipse cx="-5" cy="6" rx="4" ry="4" fill="#229954" stroke="#1E8449" stroke-width="1"/>
+    <ellipse cx="5" cy="6" rx="4" ry="4" fill="#229954" stroke="#1E8449" stroke-width="1"/>
+    <!-- Head -->
+    <ellipse cx="0" cy="-15" rx="5" ry="6" fill="#52BE80" stroke="#1E8449" stroke-width="1.5"/>
+    <circle cx="-2" cy="-16" r="1" fill="#2C3E50"/>
+    <circle cx="2" cy="-16" r="1" fill="#2C3E50"/>
+    <!-- Front flippers -->
+    <ellipse cx="-14" cy="-4" rx="7" ry="4" fill="#52BE80" stroke="#1E8449" stroke-width="1.5" transform="rotate(-30 -14 -4)"/>
+    <ellipse cx="14" cy="-4" rx="7" ry="4" fill="#52BE80" stroke="#1E8449" stroke-width="1.5" transform="rotate(30 14 -4)"/>
+    <!-- Back flippers -->
+    <ellipse cx="-12" cy="10" rx="6" ry="3.5" fill="#52BE80" stroke="#1E8449" stroke-width="1.5" transform="rotate(-20 -12 10)"/>
+    <ellipse cx="12" cy="10" rx="6" ry="3.5" fill="#52BE80" stroke="#1E8449" stroke-width="1.5" transform="rotate(20 12 10)"/>
+    <!-- Tail -->
+    <path d="M 0,12 L -1,16 L 1,16 Z" fill="#52BE80" stroke="#1E8449" stroke-width="1"/>
+  </g>
+</svg>
