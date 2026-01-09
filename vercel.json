@@ -8,12 +8,20 @@
     {
       "src": "plants/**",
       "use": "@vercel/static"
+    },
+    {
+      "src": "sandcastle/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/plants/(.*)",
       "dest": "/plants/$1"
+    },
+    {
+      "src": "/sandcastle/(.*)",
+      "dest": "/sandcastle/$1"
     },
     {
       "src": "/(.*)",
