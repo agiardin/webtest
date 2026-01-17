@@ -840,6 +840,7 @@ app.get('/', (req, res) => {
                     <p class="garden-info">✨ Great job! Click an empty spot to plant, or water a plant to help it grow!</p>
                     <div class="garden-grid" id="gardenGrid"></div>
                     <button class="continue-btn" onclick="continueTesting()">Continue Testing</button>
+                    <div id="gardenDebugInfo" style="margin-top: 2rem; padding: 1rem; background: #f0f0f0; border-radius: 8px; font-family: monospace; font-size: 0.85rem; text-align: left; max-height: 400px; overflow-y: auto;"></div>
                 </div>
             </div>
             
@@ -850,6 +851,7 @@ app.get('/', (req, res) => {
                     <p class="sandcastle-info">✨ Great job! Build your sandcastle by clicking on squares adjacent to existing sand!</p>
                     <div class="sandcastle-grid" id="sandcastleGrid"></div>
                     <button class="continue-btn" onclick="continueTesting()">Continue Testing</button>
+                    <div id="sandcastleDebugInfo" style="margin-top: 2rem; padding: 1rem; background: #f0f0f0; border-radius: 8px; font-family: monospace; font-size: 0.85rem; text-align: left; max-height: 400px; overflow-y: auto;"></div>
                 </div>
             </div>
         </div>
@@ -890,35 +892,35 @@ app.get('/', (req, res) => {
         const PLANT_TYPES = {
             'sunflower': {
                 name: 'Sunflower',
-                stages: ['plants/sunflower-0.svg', 'plants/sunflower-1.svg', 'plants/sunflower-2.svg', 'plants/sunflower-3.svg']  // sprout, sapling, mature, flowering
+                stages: ['/plants/sunflower-0.svg', '/plants/sunflower-1.svg', '/plants/sunflower-2.svg', '/plants/sunflower-3.svg']  // sprout, sapling, mature, flowering
             },
             'pine': {
                 name: 'Pine Tree',
-                stages: ['plants/pine-0.svg', 'plants/pine-1.svg', 'plants/pine-2.svg', 'plants/pine-3.svg']  // sprout, sapling, mature, with pinecones
+                stages: ['/plants/pine-0.svg', '/plants/pine-1.svg', '/plants/pine-2.svg', '/plants/pine-3.svg']  // sprout, sapling, mature, with pinecones
             },
             'oak': {
                 name: 'Oak Tree',
-                stages: ['plants/oak-0.svg', 'plants/oak-1.svg', 'plants/oak-2.svg', 'plants/oak-3.svg']  // sprout, sapling, mature, full grown
+                stages: ['/plants/oak-0.svg', '/plants/oak-1.svg', '/plants/oak-2.svg', '/plants/oak-3.svg']  // sprout, sapling, mature, full grown
             },
             'rose': {
                 name: 'Rose Bush',
-                stages: ['plants/rose-0.svg', 'plants/rose-1.svg', 'plants/rose-2.svg', 'plants/rose-3.svg']  // sprout, sapling, mature, flowering
+                stages: ['/plants/rose-0.svg', '/plants/rose-1.svg', '/plants/rose-2.svg', '/plants/rose-3.svg']  // sprout, sapling, mature, flowering
             },
             'crepe': {
                 name: 'Crepe Myrtle',
-                stages: ['plants/crepe-0.svg', 'plants/crepe-1.svg', 'plants/crepe-2.svg', 'plants/crepe-3.svg']  // sprout, sapling, mature, flowering
+                stages: ['/plants/crepe-0.svg', '/plants/crepe-1.svg', '/plants/crepe-2.svg', '/plants/crepe-3.svg']  // sprout, sapling, mature, flowering
             },
             'dogwood': {
                 name: 'Dogwood Tree',
-                stages: ['plants/dogwood-0.svg', 'plants/dogwood-1.svg', 'plants/dogwood-2.svg', 'plants/dogwood-3.svg']  // sprout, sapling, mature, flowering
+                stages: ['/plants/dogwood-0.svg', '/plants/dogwood-1.svg', '/plants/dogwood-2.svg', '/plants/dogwood-3.svg']  // sprout, sapling, mature, flowering
             },
             'daisy': {
                 name: 'Daisy',
-                stages: ['plants/daisy-0.svg', 'plants/daisy-1.svg', 'plants/daisy-2.svg', 'plants/daisy-3.svg']  // sprout, sapling, mature, flowering
+                stages: ['/plants/daisy-0.svg', '/plants/daisy-1.svg', '/plants/daisy-2.svg', '/plants/daisy-3.svg']  // sprout, sapling, mature, flowering
             },
             'queenanne': {
                 name: "Queen Annes Lace",
-                stages: ['plants/queenanne-0.svg', 'plants/queenanne-1.svg', 'plants/queenanne-2.svg', 'plants/queenanne-3.svg']  // sprout, sapling, mature, flowering
+                stages: ['/plants/queenanne-0.svg', '/plants/queenanne-1.svg', '/plants/queenanne-2.svg', '/plants/queenanne-3.svg']  // sprout, sapling, mature, flowering
             }
         };
         
@@ -934,18 +936,18 @@ app.get('/', (req, res) => {
         
         // Decoration types for sandcastle
         const DECORATION_TYPES = {
-            'sand_dollar': { name: 'Sand Dollar', image: 'sandcastle/sand-dollar.svg', isFlag: false },
-            'purple_starfish': { name: 'Purple Starfish', image: 'sandcastle/starfish.svg', isFlag: false },
-            'green_seaweed': { name: 'Green Seaweed', image: 'sandcastle/seaweed.svg', isFlag: false },
-            'conch_shell': { name: 'Conch Shell', image: 'sandcastle/conch-shell.svg', isFlag: false },
-            'red_crab': { name: 'Red Crab', image: 'sandcastle/crab.svg', isFlag: false },
-            'clam_shell': { name: 'Clam Shell', image: 'sandcastle/clam-shell.svg', isFlag: false },
-            'green_turtle': { name: 'Green Turtle', image: 'sandcastle/turtle.svg', isFlag: false },
-            'rainbow_flag': { name: 'Rainbow Flag', image: 'sandcastle/flag-rainbow.svg', isFlag: true },
-            'sunshine_flag': { name: 'Sunshine Flag', image: 'sandcastle/flag-sunshine.svg', isFlag: true },
-            'purple_flag': { name: 'Purple Flag', image: 'sandcastle/flag-purple.svg', isFlag: true },
-            'red_flag': { name: 'Red Flag', image: 'sandcastle/flag-red.svg', isFlag: true },
-            'yellow_flag': { name: 'Yellow Flag', image: 'sandcastle/flag-yellow.svg', isFlag: true }
+            'sand_dollar': { name: 'Sand Dollar', image: '/sandcastle/sand-dollar.svg', isFlag: false },
+            'purple_starfish': { name: 'Purple Starfish', image: '/sandcastle/starfish.svg', isFlag: false },
+            'green_seaweed': { name: 'Green Seaweed', image: '/sandcastle/seaweed.svg', isFlag: false },
+            'conch_shell': { name: 'Conch Shell', image: '/sandcastle/conch-shell.svg', isFlag: false },
+            'red_crab': { name: 'Red Crab', image: '/sandcastle/crab.svg', isFlag: false },
+            'clam_shell': { name: 'Clam Shell', image: '/sandcastle/clam-shell.svg', isFlag: false },
+            'green_turtle': { name: 'Green Turtle', image: '/sandcastle/turtle.svg', isFlag: false },
+            'rainbow_flag': { name: 'Rainbow Flag', image: '/sandcastle/flag-rainbow.svg', isFlag: true },
+            'sunshine_flag': { name: 'Sunshine Flag', image: '/sandcastle/flag-sunshine.svg', isFlag: true },
+            'purple_flag': { name: 'Purple Flag', image: '/sandcastle/flag-purple.svg', isFlag: true },
+            'red_flag': { name: 'Red Flag', image: '/sandcastle/flag-red.svg', isFlag: true },
+            'yellow_flag': { name: 'Yellow Flag', image: '/sandcastle/flag-yellow.svg', isFlag: true }
         };
         
         // Learning criteria constants
@@ -964,6 +966,19 @@ app.get('/', (req, res) => {
                 return new Date(now.getTime() + offsetMs);
             }
             return now;
+        }
+        
+        // Fetch directory structure from server
+        async function fetchDirectoryInfo() {
+            try {
+                const response = await fetch('/api/debug/directories');
+                if (response.ok) {
+                    return await response.json();
+                }
+            } catch (error) {
+                console.error('Failed to fetch directory info:', error);
+            }
+            return null;
         }
         
         // Load saved data on page load
@@ -1534,6 +1549,64 @@ app.get('/', (req, res) => {
                     continueBtn.style.display = 'block';
                 }
             }
+            
+            // Update debug information (async)
+            updateGardenDebugInfo();
+        }
+        
+        async function updateGardenDebugInfo() {
+            const debugDiv = document.getElementById('gardenDebugInfo');
+            if (!debugDiv) return;
+            
+            let debugHTML = '<strong>🔍 Debug Information - Garden Page</strong><br><br>';
+            
+            // Show all plant image paths
+            debugHTML += '<strong>Plant Image Paths (PLANT_TYPES):</strong><br>';
+            Object.keys(PLANT_TYPES).forEach(plantKey => {
+                const plant = PLANT_TYPES[plantKey];
+                debugHTML += '&nbsp;&nbsp;' + plant.name + ':<br>';
+                plant.stages.forEach((path, idx) => {
+                    debugHTML += '&nbsp;&nbsp;&nbsp;&nbsp;Stage ' + idx + ': ' + path + '<br>';
+                });
+            });
+            
+            // Fetch and show server directory info
+            const dirInfo = await fetchDirectoryInfo();
+            debugHTML += '<br><strong>Server Root Directory Structure:</strong><br>';
+            if (dirInfo) {
+                debugHTML += '&nbsp;&nbsp;Root: ' + dirInfo.root + '<br>';
+                debugHTML += '&nbsp;&nbsp;Plants directory exists: ' + dirInfo.plants.exists + '<br>';
+                if (dirInfo.plants.files.length > 0) {
+                    debugHTML += '&nbsp;&nbsp;Plants files (' + dirInfo.plants.files.length + '):<br>';
+                    dirInfo.plants.files.slice(0, 10).forEach(file => {
+                        debugHTML += '&nbsp;&nbsp;&nbsp;&nbsp;' + file + '<br>';
+                    });
+                    if (dirInfo.plants.files.length > 10) {
+                        debugHTML += '&nbsp;&nbsp;&nbsp;&nbsp;... and ' + (dirInfo.plants.files.length - 10) + ' more<br>';
+                    }
+                }
+            } else {
+                debugHTML += '&nbsp;&nbsp;Failed to fetch directory info<br>';
+            }
+            debugHTML += '&nbsp;&nbsp;Static serving: app.use(\'/plants\', express.static(\'plants\'))<br>';
+            
+            // Show current URL base
+            debugHTML += '<br><strong>Current Page Info:</strong><br>';
+            debugHTML += '&nbsp;&nbsp;Base URL: ' + window.location.origin + '<br>';
+            debugHTML += '&nbsp;&nbsp;Full URL: ' + window.location.href + '<br>';
+            
+            // Show actual loaded images in garden
+            debugHTML += '<br><strong>Currently Loaded Images in Garden:</strong><br>';
+            const gardenImages = document.querySelectorAll('#gardenGrid img');
+            if (gardenImages.length === 0) {
+                debugHTML += '&nbsp;&nbsp;No images currently loaded in garden<br>';
+            } else {
+                gardenImages.forEach((img, idx) => {
+                    debugHTML += '&nbsp;&nbsp;Image ' + (idx + 1) + ': src="' + img.src + '" (alt: "' + img.alt + '")<br>';
+                });
+            }
+            
+            debugDiv.innerHTML = debugHTML;
         }
         
         function selectPlant(cellIndex) {
@@ -2073,6 +2146,65 @@ app.get('/', (req, res) => {
                     continueBtn.style.display = 'block';
                 }
             }
+            
+            // Update debug information (async)
+            updateSandcastleDebugInfo();
+        }
+        
+        async function updateSandcastleDebugInfo() {
+            const debugDiv = document.getElementById('sandcastleDebugInfo');
+            if (!debugDiv) return;
+            
+            let debugHTML = '<strong>🔍 Debug Information - Sandcastle Page</strong><br><br>';
+            
+            // Show all decoration image paths
+            debugHTML += '<strong>Decoration Image Paths (DECORATION_TYPES):</strong><br>';
+            Object.keys(DECORATION_TYPES).forEach(decorKey => {
+                const decor = DECORATION_TYPES[decorKey];
+                debugHTML += '&nbsp;&nbsp;' + decor.name + ': ' + decor.image + ' (isFlag: ' + decor.isFlag + ')<br>';
+            });
+            
+            // Fetch and show server directory info
+            const dirInfo = await fetchDirectoryInfo();
+            debugHTML += '<br><strong>Server Root Directory Structure:</strong><br>';
+            if (dirInfo) {
+                debugHTML += '&nbsp;&nbsp;Root: ' + dirInfo.root + '<br>';
+                debugHTML += '&nbsp;&nbsp;Sandcastle directory exists: ' + dirInfo.sandcastle.exists + '<br>';
+                if (dirInfo.sandcastle.files.length > 0) {
+                    debugHTML += '&nbsp;&nbsp;Sandcastle files (' + dirInfo.sandcastle.files.length + '):<br>';
+                    dirInfo.sandcastle.files.forEach(file => {
+                        debugHTML += '&nbsp;&nbsp;&nbsp;&nbsp;' + file + '<br>';
+                    });
+                }
+            } else {
+                debugHTML += '&nbsp;&nbsp;Failed to fetch directory info<br>';
+            }
+            debugHTML += '&nbsp;&nbsp;Static serving: app.use(\'/sandcastle\', express.static(\'sandcastle\'))<br>';
+            
+            // Show current URL base
+            debugHTML += '<br><strong>Current Page Info:</strong><br>';
+            debugHTML += '&nbsp;&nbsp;Base URL: ' + window.location.origin + '<br>';
+            debugHTML += '&nbsp;&nbsp;Full URL: ' + window.location.href + '<br>';
+            
+            // Show actual loaded images in sandcastle
+            debugHTML += '<br><strong>Currently Loaded Images in Sandcastle:</strong><br>';
+            const sandcastleImages = document.querySelectorAll('#sandcastleGrid img');
+            if (sandcastleImages.length === 0) {
+                debugHTML += '&nbsp;&nbsp;No images currently loaded in sandcastle<br>';
+            } else {
+                sandcastleImages.forEach((img, idx) => {
+                    debugHTML += '&nbsp;&nbsp;Image ' + (idx + 1) + ': src="' + img.src + '" (alt: "' + img.alt + '")<br>';
+                });
+            }
+            
+            // Show sand cell status
+            const sandCount = sandcastle.filter(s => s && s.hasSand).length;
+            const decorCount = sandcastle.filter(s => s && s.hasSand && s.decoration).length;
+            debugHTML += '<br><strong>Sandcastle Status:</strong><br>';
+            debugHTML += '&nbsp;&nbsp;Total cells with sand: ' + sandCount + '<br>';
+            debugHTML += '&nbsp;&nbsp;Cells with decorations: ' + decorCount + '<br>';
+            
+            debugDiv.innerHTML = debugHTML;
         }
         
         function canPlaceSand(index) {
@@ -2284,6 +2416,34 @@ app.get('/', (req, res) => {
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
+});
+
+// Debug endpoint to list static file directories
+app.get('/api/debug/directories', (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  
+  try {
+    const rootDir = __dirname;
+    const plantsDir = path.join(rootDir, 'plants');
+    const sandcastleDir = path.join(rootDir, 'sandcastle');
+    
+    const result = {
+      root: rootDir,
+      plants: {
+        exists: fs.existsSync(plantsDir),
+        files: fs.existsSync(plantsDir) ? fs.readdirSync(plantsDir) : []
+      },
+      sandcastle: {
+        exists: fs.existsSync(sandcastleDir),
+        files: fs.existsSync(sandcastleDir) ? fs.readdirSync(sandcastleDir) : []
+      }
+    };
+    
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Only start server if this file is run directly
